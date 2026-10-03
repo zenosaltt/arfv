@@ -36,7 +36,7 @@
 #chapter-start()
 #include "chapters/01-sat.typ"
 #chapter-start()
-#include "chapters/02.typ"
+#include "chapters/02-smt.typ"
 
 #part-page("Formal Verification")
 #chapter-start()
