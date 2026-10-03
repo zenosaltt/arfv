@@ -1,19 +1,22 @@
-# Typst Book
+# Automated Reasoning and Formal Verification
 
-A small book project with a cover, front matter, contents, parts, chapters, references, footnotes, numbered equations, and figures in the right margin or the main text. Each chapter has one file under `chapters/` containing all its sections. Generated PDFs are excluded from Git.
+Welcome to the _Automated Reasoning and Formal Verification_ (ARFV) notes. This book is based on...
 
-## Requirements
+Prof. Sebastiani's [course material](https://disi.unitn.it/rseba/DIDATTICA/arfv2026/SLIDES/).
 
-- [Docker](https://docs.docker.com/get-docker/) with a running Docker Engine for the same build used by GitHub Actions. The first build downloads the [official Typst image](https://github.com/typst/typst/pkgs/container/typst), `ghcr.io/typst/typst:0.15.1`.
+## Build and develop on your own: requirements
+
+- [Docker](https://docs.docker.com/get-docker/) with the [official Typst image](https://github.com/typst/typst/pkgs/container/typst), `ghcr.io/typst/typst:0.15.1`.
 - `make` and Git for the commands below.
-- Optional: [Typst 0.15.1](https://typst.app/open-source/) for builds without Docker, and VS Code with [Tinymist](https://marketplace.visualstudio.com/items?itemName=myriad-dreamin.tinymist) for editing.
-- [Typstyle 0.15.1](https://github.com/typstyle-rs/typstyle/releases/tag/v0.15.1) for local source formatting. Download its binary or run `cargo install typstyle --version 0.15.1 --locked`.
+- Optional: [Typst 0.15.1](https://typst.app/open-source/) for builds without Docker.
+- [Typstyle 0.15.1](https://github.com/typstyle-rs/typstyle/releases/tag/v0.15.1) for local source formatting.
 
-## Set up your book
+Recommended VS Code extension: [Tinymist](https://marketplace.visualstudio.com/items?itemName=myriad-dreamin.tinymist).
 
-Run `make docker-build` once to check the project and create `build/document.pdf`. Then edit the document metadata and `#cover-page(...)` in `main.typ`, replace the example files under `chapters/` and their `#include` lines in `main.typ`, and update `bibliography.bib` and `images/` as needed. Keep the `#chapter-start()` call before each included chapter.
+## Setup
+Clone this repository and run `make docker-build` once to check the project and create `build/document.pdf`. That's it.
 
-Commit and push the book's content to its repository. The GitHub workflows build previews on pushes and pull requests, and publish a PDF when you push a tag.
+> Note: inspect the `make` file to see what commands are actually running.
 
 ## Build locally
 
@@ -24,13 +27,13 @@ make docker-build  # Same Typst image and command as CI; writes build/document.p
 make clean         # Remove the local PDF
 ```
 
-Docker mounts this repository at `/work` inside the container. The PDF appears in the host's `build/` directory, and the container runs with your user and group IDs so the output remains editable. The image is pinned to Typst 0.15.1 in the `Makefile`, which is also used by both GitHub workflows. A successful build needs no Dockerfile or local Typst installation.
+Docker mounts this repository at `/work` inside the container. The PDF appears in the host's `build/` directory. The image is pinned in the `Makefile`, which is also used by both GitHub workflows. A successful build needs no Dockerfile or local Typst installation.
 
-If Typst 0.15.1 is installed on your machine, the equivalent commands are `make build` and `make watch`. Both build paths use `main.typ` and write `build/document.pdf`. The cover fonts are included in `fonts/`, and each build command passes that directory to Typst, so local and Docker builds use the same cover typography.
+If Typst is installed on your machine, the equivalent commands are `make build` and `make watch` (builds automatically upon file changes and saves). Both build paths use `main.typ` and write `build/document.pdf`. Fonts are included in `fonts/`, and each build command passes that directory to Typst, so local and Docker builds use the same typography.
 
 Open the repository folder in VS Code, rather than a chapter file on its own. The committed `.vscode/settings.json` tells Tinymist to use `main.typ` as the entry point while you edit included chapters. Reload the VS Code window if you already had the project open. A chapter compiled in isolation lacks the book's heading and equation numbering rules, so references such as `@sec-local-build` can appear invalid even though the complete book compiles.
 
-To preview a release cover locally, pass a tag to either build:
+This book allows to print a version tag on its cover, so as to identify different PDF versions. To preview a release cover locally, pass a tag to either build:
 
 ```sh
 RELEASE_TAG=v1.0.0 make docker-build
@@ -38,27 +41,11 @@ RELEASE_TAG=v1.0.0 make docker-build
 
 The tag is printed as `RELEASE v1.0.0` at the bottom of the cover. Without `RELEASE_TAG`, the cover has no release line. This input affects the PDF only; it does not create a Git tag or a GitHub Release. Every build also adds a separate page immediately after the cover with `last build YYYY-MM-DD`, using the compilation date even when no release tag is set.
 
-The cover in `main.typ` follows the supplied A4 design: a blue field, double black border, black series band, italic author, and two-line small-cap title. The series uses Cinzel and the title uses IM FELL French Canon SC. Their font files and OFL licenses are in `fonts/`. The inner frame starts below the series band. Edit the `#cover-page(...)` call to change the title, author, or optional `series` and `subtitle`. Use an explicit line break in a long title to control its proportions. The middle of the cover is reserved for optional artwork; pass Typst content with a size that fits within 170 × 110 mm, for example:
-
-```typst
-#cover-page(
-  [Fondamenti Matematici \
-    per l’Informatica],
-  "Zeno Saletti",
-  release-tag: release-tag,
-  artwork: image("images/cover-art.png", width: 150mm),
-)
-```
-
-Omit `artwork` to keep that area empty. The frame and text are drawn in Typst; no cover image or external package is required.
-
-To change the shared color, edit only `accent` at the top of `styles/book.typ`. It controls the cover field and series lettering, chapter heading rules, part and chapter labels, and section numbers in the chapter margin contents. The quotation rule remains black.
-
 ## Format Typst sources
 
 Run `make format` to format every `.typ` file in the project. Typstyle wraps paragraphs, captions, and code to an 80-character line width. Run `make format-check` to verify formatting without changing files. The check also reports any lines still longer than 80 characters, such as a string that cannot be split automatically; shorten or restructure those manually.
 
-Tinymist uses the same line width and paragraph wrapping mode in VS Code, and formats Typst files when you save them. The build and release workflows install the pinned Typstyle 0.15.1 binary, verify its SHA-256 digest, and run `make format-check` before compiling the PDF. CI reports formatting problems and fails until you run `make format` and commit the result.
+Tinymist uses the same line width and paragraph wrapping mode in VS Code, and formats Typst files when you save them. The build and release workflows install the pinned Typstyle binary, verify its SHA-256 digest, and run `make format-check` before compiling the PDF. CI reports formatting problems and fails until you run `make format` and commit the result.
 
 ## Edit the book
 
@@ -109,8 +96,6 @@ Use `#part-page("Title")` to start a new group. Parts and chapters start on righ
 
 Every push to `main` and every pull request runs `make format-check` followed by `make docker-build`. The resulting PDF is available as a temporary `document-preview` artifact on that workflow run's page. These builds have no release tag on the cover, but still show the compilation date on the page after it.
 
-Typst errors and warnings appear in the build step's log and as file-and-line annotations on the GitHub Actions run. Errors fail the build, so no preview PDF is uploaded; warnings remain visible without failing it. The same diagnostics are shown when compiling a tagged release. To inspect them locally, run `make docker-build` (or `make build`); local output uses Typst's more readable diagnostic format.
-
 Pushing a tag triggers the release workflow. It passes the exact Git tag to Typst, builds the PDF with Docker, and creates a GitHub Release with `document.pdf` attached. For example, after committing and pushing your changes:
 
 ```sh
@@ -118,25 +103,4 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-The cover of that release PDF displays `RELEASE v1.0.0`. Find it under the repository's **Releases** tab or on the release workflow run. Each new release needs a new tag. The PDF is attached to the release and remains outside Git history.
-
-## Update the book style
-
-Book content lives in `main.typ` and `chapters/`; the original template maintains `styles/book.typ`. To review style changes from the template repository, add it as a source of updates in your book repository:
-
-```sh
-git remote add template https://github.com/zenosaltt/typst-template.git
-git fetch template
-git diff HEAD template/main -- styles/book.typ fonts/ Makefile .github/
-```
-
-If you have no local edits to preserve in `styles/book.typ`, take the latest version and check the result:
-
-```sh
-git restore --source=template/main -- styles/book.typ
-make docker-build
-git add styles/book.typ
-git commit -m "Update book style from template"
-```
-
-Run `git fetch template` again for later updates. `git restore` replaces the local style file, so merge changes manually if the book has customized it. If an update also needs new fonts, build settings, or workflow changes, bring over those reviewed files in the same way and build again. Updates are applied deliberately in each book.
+The cover of that release PDF displays `RELEASE v1.0.0`. Find it under the repository's **Releases** tab or on the release workflow run. Each new release needs a new tag.

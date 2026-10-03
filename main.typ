@@ -19,30 +19,28 @@
 
 #build-page()
 
-#front-page("An Opening Thought", [
+#front-page("Preface", [
   #epigraph(
-    [A well-structured document helps readers find their way before explaining
-      the path.],
-    [Sample text],
+    [Lorem ipsum dolor sit amet, consectetur adipiscing elit.],
+    [Someone],
   )
 ])
 
 #front-page("Notes", [
-  The text, quotations, and figures in this book are examples. Replace them with
-  your own material and verify all sources before publication.
+  #lorem(200)
 ])
 
 #contents-page()
 
-#part-page("Foundations")
+#part-page("Automated Reasoning")
 #chapter-start()
-#include "chapters/01-principles.typ"
+#include "chapters/01-sat.typ"
 #chapter-start()
-#include "chapters/02-workflow.typ"
+#include "chapters/02.typ"
 
-#part-page("Next Steps")
+#part-page("Formal Verification")
 #chapter-start()
-#include "chapters/03-next-steps.typ"
+#include "chapters/05-explicit_state_ctl_model_checking.typ"
 
 #pagebreak()
 #heading(level: 1, numbering: none)[References]
