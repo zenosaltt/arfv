@@ -1,0 +1,436 @@
+#let ink = rgb("25344a")
+// Change this value to recolor the cover and the book's accent details.
+#let accent = rgb("#3e84d4")
+#let margin-width = 5.85cm
+#let chapter-counter = counter("chapter")
+#let image-counter = counter(figure.where(kind: image))
+#let table-counter = counter(figure.where(kind: table))
+#let algorithm-counter = counter(figure.where(kind: "algorithm"))
+
+#let figure-numbering(number) = numbering(
+  "1.1",
+  chapter-counter.at(here()).first(),
+  number,
+)
+#let equation-numbering(number) = numbering(
+  "(1.1)",
+  chapter-counter.at(here()).first(),
+  number,
+)
+
+// Parts are the top level, but are excluded from chapter numbers.
+#let book-numbering(..numbers) = {
+  let values = numbers.pos()
+  if values.len() == 1 {
+    numbering("I", values.at(0))
+  } else if values.len() == 2 {
+    chapter-counter.display("1")
+  } else if values.len() == 3 {
+    [#chapter-counter.display("1").#numbering("1", values.at(2))]
+  } else {
+    []
+  }
+}
+
+#let document-style(body) = {
+  set page(
+    paper: "a4",
+    margin: (left: 2.4cm, right: 7cm, top: 2.5cm, bottom: 2.5cm),
+    numbering: "1",
+    number-align: center,
+    footer: context {
+      let starts = query(metadata.where(value: "recto-before"))
+      let ends = query(metadata.where(value: "recto-after"))
+      let current = counter(page).get().first()
+      let intentional = range(starts.len()).any(i => (
+        current > starts.at(i).location().page()
+          and current < ends.at(i).location().page()
+      ))
+      if intentional {
+        align(center)[#text(
+          size: 6.5pt,
+          style: "italic",
+          fill: gray,
+        )[intentionally left blank]]
+      } else {
+        align(center)[#counter(page).display("1")]
+      }
+    },
+  )
+  set text(font: "New Computer Modern", size: 8pt, lang: "en", fill: ink)
+  set par(
+    justify: true,
+    leading: 0.68em,
+    spacing: 0.65em,
+    first-line-indent: (amount: 1.3em, all: true),
+  )
+  set heading(numbering: book-numbering)
+  show figure.where(kind: image): set figure(
+    numbering: figure-numbering,
+    supplement: [Fig.],
+  )
+  show figure.where(kind: image): set block(below: 0.85cm)
+  show figure.where(kind: table): set figure(
+    numbering: figure-numbering,
+    supplement: [Table],
+  )
+  show figure.where(kind: table): set figure.caption(position: top)
+  show figure.where(kind: table): set block(above: 0.4cm, below: 0.6cm)
+  show figure.where(kind: "algorithm"): set figure(
+    numbering: figure-numbering,
+    supplement: [Algorithm],
+    gap: 0.08cm,
+  )
+  show figure.where(kind: "algorithm"): set figure.caption(position: top)
+  show figure.where(kind: "algorithm"): set block(
+    above: 0.4cm,
+    below: 0.6cm,
+  )
+  set math.equation(numbering: equation-numbering)
+  show math.equation.where(block: true): set block(above: 0.5cm, below: 0.5cm)
+  show figure.caption.where(kind: image): it => {
+    set text(size: 7.25pt, fill: black)
+    set par(justify: true, first-line-indent: 0pt)
+    align(left)[#strong([Fig. #context it.counter.display(it.numbering)]):
+      #it.body]
+  }
+  show figure.caption.where(kind: table): it => {
+    set text(size: 7.25pt, fill: black)
+    set par(justify: false, first-line-indent: 0pt)
+    align(center)[#strong([Table #context it.counter.display(it.numbering)]):
+      #it.body]
+  }
+  show figure.caption.where(kind: "algorithm"): it => {
+    set text(size: 8pt, fill: ink)
+    set par(justify: false, first-line-indent: 0pt)
+    grid(
+      columns: (1fr,),
+      row-gutter: 0.1cm,
+      rect(width: 100%, height: 0.8pt, fill: ink, stroke: none),
+      align(left)[
+        #strong([Algorithm #context it.counter.display(it.numbering)])
+        #it.body
+      ],
+      rect(width: 100%, height: 0.5pt, fill: ink, stroke: none),
+    )
+  }
+  show heading.where(level: 1): it => {
+    if it.numbering == none {
+      block(above: 0pt, below: 1cm)[
+        #set par(justify: false, first-line-indent: 0pt)
+        #align(left)[#text(size: 19.5pt, weight: "bold")[#it.body]]
+      ]
+    } else {
+      block(above: 0pt, below: 1cm)[
+        #set par(justify: false, first-line-indent: 0pt)
+        #align(left)[
+          #text(
+            size: 8.5pt,
+            weight: "bold",
+            fill: accent,
+          )[PART #counter(heading).display("I")]
+          #v(0.5cm)
+          #text(size: 24pt, weight: "bold", fill: ink)[#it.body]
+        ]
+      ]
+    }
+  }
+  show heading.where(level: 2): it => block(above: 0pt, below: 0.45cm)[
+    #set par(justify: false, first-line-indent: 0pt)
+    #align(left)[
+      #text(size: 9pt, weight: "bold", fill: accent)[CHAPTER
+        #chapter-counter.display("1")]
+      #v(0.35cm)
+      #text(size: 16pt, weight: "bold", style: "italic")[#it.body]
+    ]
+    #v(0.12cm)
+    #line(length: 100%, stroke: (paint: accent, thickness: 1.3pt))
+  ]
+  show heading.where(level: 3): it => block(above: 0.7cm, below: 0.25cm)[
+    #set par(justify: false, first-line-indent: 0pt)
+    #align(left)[#text(size: 10.5pt, weight: "bold")[#counter(heading).display()
+      #it.body]]
+  ]
+  body
+}
+
+#let cover-page(
+  title,
+  author,
+  series: [*GLI APPUNTI*],
+  subtitle: none,
+  release-tag: "",
+  artwork: none,
+) = page(
+  paper: "a4",
+  margin: 0pt,
+  fill: accent,
+  header: none,
+  footer: none,
+  numbering: none,
+)[
+  // The two hairlines and the solid series band follow the A4 trim.
+  #place(top + left, dx: 3.5mm, dy: 3.5mm)[
+    #rect(width: 203mm, height: 290mm, stroke: 1.8pt)
+  ]
+  #place(top + left, dx: 6mm, dy: 6mm)[
+    #rect(width: 198mm, height: 26mm, fill: black)
+  ]
+  #place(top + left, dx: 6mm, dy: 33.5mm)[
+    #rect(width: 198mm, height: 257.5mm, stroke: 1.8pt)
+  ]
+  #place(top + center, dy: 9mm)[
+    #box(width: 190mm, height: 20mm)[
+      #align(center + horizon)[
+        #text(
+          font: "Cinzel",
+          size: 37pt,
+          tracking: 0.43em,
+          fill: accent,
+        )[#series]
+      ]
+    ]
+  ]
+
+  #place(top + center, dy: 64mm)[
+    #box(width: 185mm)[
+      #align(center)[
+        #text(
+          font: "New Computer Modern",
+          size: 28pt,
+          style: "italic",
+          fill: black,
+        )[#author]
+      ]
+    ]
+  ]
+  #place(top + center, dy: 89mm)[
+    #box(width: 190mm)[
+      #set par(leading: 0.5em)
+      #align(center)[
+        #text(font: "IM FELL French Canon SC", size: 40pt, fill: black)[
+          #title
+        ]
+      ]
+    ]
+  ]
+  #if subtitle != none {
+    place(top + center, dy: 128mm)[
+      #box(width: 175mm)[
+        #align(center)[#text(size: 12pt, fill: black)[#subtitle]]
+      ]
+    ]
+  }
+  // This reserved area stays empty until a book supplies cover artwork.
+  #if artwork != none {
+    place(top + center, dy: 145mm)[
+      #box(width: 170mm, height: 110mm)[
+        #align(center + horizon)[#artwork]
+      ]
+    ]
+  }
+  #if release-tag != "" {
+    place(bottom + center, dy: -12mm)[
+      #text(font: "New Computer Modern", size: 11pt, fill: black)[
+        RELEASE #release-tag
+      ]
+    ]
+  }
+]
+
+#let build-page() = page(
+  paper: "a4",
+  margin: 0pt,
+  header: none,
+  footer: none,
+  numbering: none,
+)[
+  #set par(justify: false, first-line-indent: 0pt)
+  #align(center + horizon)[Last build: #datetime.today().display()]
+]
+
+#let front-page(title, body) = {
+  pagebreak()
+  v(2cm)
+  align(left)[
+    #set par(first-line-indent: 0pt)
+    #text(size: 17pt, weight: "bold")[#title]
+  ]
+  v(1.2cm)
+  body
+}
+
+#let contents-page() = {
+  pagebreak()
+  align(left)[
+    #set par(first-line-indent: 0pt)
+    #text(size: 19.5pt, weight: "bold")[Contents]
+  ]
+  v(1cm)
+  show outline.entry: it => {
+    if it.level == 2 or (it.level == 1 and it.element.numbering != none) {
+      link(
+        it.element.location(),
+        it.indented(it.prefix(), [#strong(it.body()) #box(width: 1fr, it.fill)
+          #it.page()]),
+      )
+    } else {
+      link(it.element.location(), it.indented(it.prefix(), it.inner()))
+    }
+  }
+  outline(depth: 3, title: none, indent: 1.1em)
+}
+
+#let recto-break() = {
+  metadata("recto-before")
+  pagebreak(to: "odd")
+  metadata("recto-after")
+}
+
+#let part-page(title) = {
+  recto-break()
+  v(6cm)
+  heading(level: 1)[#title]
+}
+
+#let outer-note(body) = place(
+  right,
+  dx: 6.45cm,
+  block(width: margin-width)[#body],
+)
+
+#let margin_figure(path, caption: none, id: none) = outer-note([
+  #figure(image(path, width: 100%), caption: caption)
+  #if id != none { id }
+])
+
+#let margin_diagram(body, caption: none, alt: none, id: none) = outer-note([
+  #figure(align(center, body), kind: image, caption: caption, alt: alt)
+  #if id != none { id }
+])
+
+#let body_figure(path, caption, width: 100%) = figure(
+  image(path, width: width),
+  caption: caption,
+)
+
+#let body_diagram(body, caption, alt) = figure(
+  align(center, body),
+  kind: image,
+  caption: caption,
+  alt: alt,
+)
+
+#let body_table(data, caption) = figure(
+  align(center, data),
+  kind: table,
+  caption: caption,
+)
+
+#let margin_table(data, caption, id: none) = outer-note([
+  #figure(align(center, data), kind: table, caption: caption)
+  #if id != none { id }
+])
+
+#let algorithm(title, lines) = figure(
+  block(width: 100%)[
+    #set text(size: 8.5pt)
+    #set par(justify: false, first-line-indent: 0pt)
+    #let cells = {
+      let result = ()
+      for (index, step) in lines.enumerate() {
+        result.push(align(right)[#text(size: 7.5pt)[#(index + 1):]])
+        result.push(pad(left: step.indent * 0.28cm)[#step.body])
+      }
+      result
+    }
+    #grid(
+      columns: (1fr,),
+      row-gutter: 0.08cm,
+      grid(
+        columns: (0.55cm, 1fr),
+        column-gutter: 0.12cm,
+        row-gutter: 0.08cm,
+        align: left,
+        ..cells,
+      ),
+      line(length: 100%, stroke: (paint: ink, thickness: 0.8pt)),
+    )
+  ],
+  kind: "algorithm",
+  caption: title,
+)
+
+#let epigraph(words, author) = align(right)[#block(width: 48%)[
+  #set par(justify: false, first-line-indent: 0pt)
+  #align(left)[#text(size: 7.5pt, style: "italic")[#words]]
+  #v(0.12cm)
+  #line(length: 100%, stroke: (paint: black, thickness: 0.8pt))
+  #v(0.1cm)
+  #align(right)[#text(size: 7pt, fill: black)[#author]]
+]]
+
+#let chapter-start() = {
+  recto-break()
+  chapter-counter.step()
+  image-counter.update(0)
+  table-counter.update(0)
+  algorithm-counter.update(0)
+  counter(math.equation).update(0)
+}
+
+#let short-title(title) = metadata((kind: "short-title", title: title))
+
+#let chapter-opening(quote: none, author: none) = context {
+  let major = heading.where(level: 1).or(heading.where(level: 2))
+  let next-major = query(selector(major).after(here())).first(default: none)
+  let section-selector = selector(heading.where(level: 3)).after(here())
+  if next-major != none {
+    section-selector = section-selector.before(next-major.location())
+  }
+  let sections = query(section-selector)
+
+  outer-note([
+    #set par(justify: false, first-line-indent: 0pt)
+    #for index in range(sections.len()) {
+      let item = sections.at(index)
+      let following = sections.at(index + 1, default: next-major)
+      let short-selector = selector(metadata).after(item.location())
+      if following != none {
+        short-selector = short-selector.before(following.location())
+      }
+      let abbreviated = query(short-selector)
+        .filter(entry => (
+          type(entry.value) == dictionary
+            and entry.value.at("kind", default: none) == "short-title"
+        ))
+        .first(default: none)
+      let label = if abbreviated == none { item.body } else {
+        abbreviated.value.title
+      }
+      block(above: 0.1cm, below: 0.1cm)[
+        #grid(
+          columns: (0.7cm, 1fr),
+          gutter: 0.05cm,
+          align(left)[#text(
+            size: 8pt,
+            weight: "bold",
+            fill: accent,
+          )[#context numbering(
+            "1.1",
+            chapter-counter.get().first(),
+            index + 1,
+          )]],
+          align(left)[#text(size: 8pt)[#label]],
+        )
+      ]
+    }
+  ])
+  if quote != none {
+    v(0.2cm)
+    epigraph(quote, author)
+    v(1.2cm)
+  } else {
+    v(0.9cm)
+  }
+}

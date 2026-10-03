@@ -1,0 +1,26 @@
+name: Build document
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install Typstyle
+        run: bash .github/scripts/install-typstyle.sh
+      - name: Check Typst formatting
+        run: make format-check
+      - name: Build PDF and report Typst diagnostics
+        run: python3 .github/scripts/build-with-diagnostics.py make docker-build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: document-preview
+          path: build/document.pdf
+          if-no-files-found: error

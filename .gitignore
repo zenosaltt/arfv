@@ -1,0 +1,7 @@
+# Generated PDFs (including build/)
+*.pdf
+
+# Local files
+.DS_Store
+.vscode/*
+!.vscode/settings.json

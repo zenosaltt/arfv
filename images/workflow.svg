@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="140" viewBox="0 0 720 140">
+  <rect width="720" height="140" fill="#ffffff"/>
+  <rect x="12" y="30" width="185" height="80" rx="12" fill="#e7efff" stroke="#3d65a9" stroke-width="2"/>
+  <rect x="268" y="30" width="185" height="80" rx="12" fill="#e7efff" stroke="#3d65a9" stroke-width="2"/>
+  <rect x="524" y="30" width="185" height="80" rx="12" fill="#e7efff" stroke="#3d65a9" stroke-width="2"/>
+  <path d="M205 70h52m-10-10 10 10-10 10M461 70h52m-10-10 10 10-10 10" fill="none" stroke="#3d65a9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#18345f" font-family="sans-serif" font-size="19" text-anchor="middle">
+    <text x="104" y="77">File .typ</text>
+    <text x="360" y="77">make build</text>
+    <text x="616" y="77">PDF</text>
+  </g>
+</svg>

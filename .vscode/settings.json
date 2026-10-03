@@ -1,0 +1,9 @@
+{
+  "tinymist.typstExtraArgs": ["main.typ"],
+  "tinymist.formatterMode": "typstyle",
+  "tinymist.formatterPrintWidth": 80,
+  "tinymist.formatterProseWrap": "fill",
+  "[typst]": {
+    "editor.formatOnSave": true
+  }
+}

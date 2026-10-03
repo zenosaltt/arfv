@@ -1,0 +1,26 @@
+name: Release document
+
+on:
+  push:
+    tags: ['**']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install Typstyle
+        run: bash .github/scripts/install-typstyle.sh
+      - name: Check Typst formatting
+        run: make format-check
+      - name: Build tagged PDF with Docker
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: python3 .github/scripts/build-with-diagnostics.py make docker-build
+      - name: Publish GitHub Release with PDF
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" build/document.pdf --verify-tag --generate-notes
