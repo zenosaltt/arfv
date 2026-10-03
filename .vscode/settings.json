@@ -2,7 +2,7 @@
   "tinymist.typstExtraArgs": ["main.typ"],
   "tinymist.formatterMode": "typstyle",
   "tinymist.formatterPrintWidth": 80,
-  "tinymist.formatterProseWrap": "fill",
+  "tinymist.formatterProseWrap": true,
   "[typst]": {
     "editor.formatOnSave": true
   }
