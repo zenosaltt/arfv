@@ -17,6 +17,8 @@
 #pagebreak()
 #include "frontmatter/preface.typ"
 #pagebreak()
+#include "frontmatter/acknowledgments.typ"
+#pagebreak()
 #include "frontmatter/notes.typ"
 #pagebreak()
 #include "frontmatter/contents.typ"
