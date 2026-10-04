@@ -2,7 +2,7 @@
 
 // Shared palette, margin width, and counters for chapter-scoped numbering.
 #let ink = rgb("25344a")
-// Change this value to recolor the cover and the book's accent details.
+// Accent color for book details.
 #let accent = rgb("#3e84d4")
 #let margin-width = 5.85cm
 #let chapter-counter = counter("chapter")
@@ -149,89 +149,44 @@
   body
 }
 
-// Standalone cover; artwork and release-tag are optional.
-#let cover-page(
-  title,
-  author,
-  series: [*GLI APPUNTI*],
-  subtitle: none,
-  release-tag: "",
-  artwork: none,
-) = page(
+// Standalone photographic cover with a translucent text panel.
+#let cover-page(title, author, release-tag: "") = page(
   paper: "a4",
   margin: 0pt,
-  fill: accent,
   header: none,
   footer: none,
   numbering: none,
 )[
-  // The two hairlines and the solid series band follow the A4 trim.
-  #place(top + left, dx: 3.5mm, dy: 3.5mm)[
-    #rect(width: 203mm, height: 290mm, stroke: 1.8pt)
+  #place(top + left)[
+    #image(
+      "../images/broadperspective.jpg",
+      width: 210mm,
+      height: 297mm,
+      fit: "cover",
+    )
   ]
-  #place(top + left, dx: 6mm, dy: 6mm)[
-    #rect(width: 198mm, height: 26mm, fill: black)
-  ]
-  #place(top + left, dx: 6mm, dy: 33.5mm)[
-    #rect(width: 198mm, height: 257.5mm, stroke: 1.8pt)
-  ]
-  #place(top + center, dy: 9mm)[
-    #box(width: 190mm, height: 20mm)[
-      #align(center + horizon)[
-        #text(
-          font: "Cinzel",
-          size: 37pt,
-          tracking: 0.43em,
-          fill: accent,
-        )[#series]
+  #place(bottom + left, dx: 12mm, dy: -18mm)[
+    #rect(
+      width: 186mm,
+      height: 79mm,
+      fill: rgb(17, 17, 17, 78%),
+      radius: 2mm,
+      inset: (left: 11mm, right: 11mm, top: 9mm, bottom: 9mm),
+    )[
+      #set par(justify: false, first-line-indent: 0pt)
+      #text(size: 12pt, weight: "bold", fill: white)[#author]
+      #v(5mm)
+      #text(size: 24pt, weight: "bold", fill: white)[#title]
+      #v(6mm)
+      #text(size: 10pt, fill: white)[
+        #if release-tag != "" {
+          [VERSION #release-tag]
+        } else {
+          [DRAFT · #datetime.today().display()]
+        }
       ]
     ]
   ]
-
-  #place(top + center, dy: 64mm)[
-    #box(width: 185mm)[
-      #align(center)[
-        #text(
-          font: "New Computer Modern",
-          size: 28pt,
-          style: "italic",
-          fill: black,
-        )[#author]
-      ]
-    ]
-  ]
-  #place(top + center, dy: 89mm)[
-    #box(width: 190mm)[
-      #set par(leading: 0.5em)
-      #align(center)[
-        #text(font: "IM FELL French Canon SC", size: 40pt, fill: black)[
-          #title
-        ]
-      ]
-    ]
-  ]
-  #if subtitle != none {
-    place(top + center, dy: 128mm)[
-      #box(width: 175mm)[
-        #align(center)[#text(size: 12pt, fill: black)[#subtitle]]
-      ]
-    ]
-  }
-  // This reserved area stays empty until a book supplies cover artwork.
-  #if artwork != none {
-    place(top + center, dy: 145mm)[
-      #box(width: 170mm, height: 110mm)[
-        #align(center + horizon)[#artwork]
-      ]
-    ]
-  }
-  #if release-tag != "" {
-    place(bottom + center, dy: -12mm)[
-      #text(font: "New Computer Modern", size: 11pt, fill: black)[
-        RELEASE #release-tag
-      ]
-    ]
-  }
 ]
 
 // Standalone colophon with build date and license notice.
