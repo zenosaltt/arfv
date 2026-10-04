@@ -17,6 +17,7 @@ Typst
 Typstyle
 UniTN
 logics
+Saletti
 subcase
 subtree
 unsat
