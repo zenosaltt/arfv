@@ -1,8 +1,4 @@
-#import "../styles/book.typ": (
-  algorithm, body_diagram, body_figure, body_table, chapter-opening,
-  margin_diagram, margin_figure, margin_table, short-title,
-)
-#import "../diagrams.typ": binary-tree, two-state-dfa
+#import "../styles/book.typ": chapter-opening, short-title
 
 == Satisfiability Modulo Theories (SMT)
 

@@ -1,11 +1,18 @@
-# Automated Reasoning and Formal Verification
+# Automated Reasoning and Formal Verification (UniTN, 26/27)
 
 Welcome to the _Automated Reasoning and Formal Verification_ (ARFV) notes. This book is based on...
 
 Prof. Sebastiani's [course material](https://disi.unitn.it/rseba/DIDATTICA/arfv2026/SLIDES/).
 
-## Build and develop on your own: requirements
+### A Typst-based project
 
+
+## Build, develop, and collaborate
+This repo allows you to build the PDF locally, without waiting for a brand new file in the Release page of this repository.
+
+> Note: so far, the following instructions assume you are working inside a UNIX-like environment (Linux, macOS). For Windows users, WSL might be a useful starting point.
+
+### Requirements
 - [Docker](https://docs.docker.com/get-docker/) with the [official Typst image](https://github.com/typst/typst/pkgs/container/typst), `ghcr.io/typst/typst:0.15.1`.
 - `make` and Git for the commands below.
 - Optional: [Typst 0.15.1](https://typst.app/open-source/) for builds without Docker.
@@ -49,9 +56,22 @@ Tinymist uses the same line width and paragraph wrapping mode in VS Code, and fo
 
 ## Edit the book
 
-`main.typ` sets the order of the cover, front matter, parts, and chapters. Each file in `chapters/` is ordinary Typst markup: a `==` chapter heading, `===` section headings, and paragraphs written directly beneath them. There is no chapter data structure or nested `body` field. Styles and page layout live in `styles/book.typ`; images live in `images/`; references live in `bibliography.bib`.
+`main.typ` is the reading order of the book. Files in `frontmatter/` provide the
+cover, build information, preface, notes, and contents; `chapters/` contains each
+complete chapter; `backmatter/` contains the references. Page styles and layout
+helpers live in `styles/book.typ`.
 
-For example, a chapter file can begin like this:
+Page boundaries are written in `main.typ`: `#pagebreak()` always starts a new
+page, while `#blank-page-if-needed()` starts the next part or chapter on a
+right-hand page. It adds a left-hand page marked “intentionally left blank”
+only when needed. The part-page, preface, notes, and contents helpers do not
+insert hidden page breaks; cover and build information are self-contained
+pages.
+
+To add a chapter, create another `.typ` file under `chapters/` with a `==`
+heading and `#chapter-opening()`. The chapter file includes its title, margin
+contents, opening quotation, sections, and any internal page breaks. For
+example:
 
 ```typst
 #import "../styles/book.typ": chapter-opening, short-title
@@ -73,24 +93,46 @@ Write the first paragraph here. Add a note#footnote[An example note.] when neede
 Write the next paragraph here. See @sec-example for an earlier section.
 ```
 
-`#chapter-opening()` builds the small margin contents automatically from the `===` headings in that chapter. The quotation and author are optional. Place `#short-title[...]` immediately after a long section heading to abbreviate only its margin entry. The heading in the text and main contents stays complete. Add a label such as `<sec-example>` to a heading and refer to it with `@sec-example`.
-
-To add a margin figure, import `margin_figure` from `../styles/book.typ` and place `#margin_figure("../images/name.svg", caption: [Caption text.], id: <fig-name>)` where the figure belongs. For a wider figure in the main text, import `body_figure` and write `#body_figure("../images/name.svg", [Caption text.]) <fig-name>`. Figures are numbered within each chapter, such as **Fig. 2.1**, and can be referenced with `@fig-name`.
-
-Diagrams can also be drawn directly in Typst. The tree and finite automaton in [Chapter 2](chapters/02-workflow.typ) are defined in [`diagrams.typ`](diagrams.typ) with built-in shapes, curves, and math labels; no drawing package or image file is needed. Wrap a Typst drawing with `margin_diagram(..., caption: [...], alt: "...", id: <fig-name>)` or `body_diagram(..., [Caption], "Alternative description") <fig-name>` to retain the same figure numbering and references.
-
-For a numbered table in the main column, import `body_table` and write `#body_table(table(columns: 2, [A], [B], [1], [2]), [Caption]) <tab-name>`. For a small table in the outer margin, import `margin_table` and pass the same `table(...)` plus `id: <tab-name>`. Use a column count or `auto` tracks to size columns to their contents; `fr` tracks expand to fill the available width. Both helpers center the table and caption. Tables have their own chapter-based sequence, such as **Table 2.1**, and can be cited with `@tab-name`. To write pseudocode, import `algorithm` and pass a title plus an array of `(indent: ..., body: [...])` lines, then attach a label and cite it with `@alg-name`. [Chapter 2](chapters/02-workflow.typ) shows all three forms.
-
-A displayed equation such as `$ a_(n+1) = a_n + 1 $ <eq-example>` receives a chapter number such as `(2.1)` and can be referenced with `@eq-example`. Equation numbers start at one in each chapter. Add a footnote with `#footnote[Footnote text.]`. [Chapter 2](chapters/02-workflow.typ) demonstrates both figure placements, equations, and cross-references.
-
-To add a chapter, create another `.typ` file under `chapters/` with a `==` heading and `#chapter-opening()`. Then insert these two lines in `main.typ` at the desired point:
+Then add the complete chapter to `main.typ` at the desired point:
 
 ```typst
-#chapter-start()
-#include "chapters/new-chapter.typ"
+#blank-page-if-needed()
+#chapter([#include "chapters/new-chapter.typ"])
 ```
 
-Use `#part-page("Title")` to start a new group. Parts and chapters start on right-hand pages; inserted blank pages say “intentionally left blank.” Because parts use `=` headings internally, chapters use `==` and sections use `===`.
+`#chapter(...)` also advances the chapter number and resets figure, table,
+algorithm, and equation numbering. To start a new part, write
+`#blank-page-if-needed()` followed by `#part-page("Part Title")`.
+
+For pseudocode, use [`algorithmic`](https://typst.app/universe/package/algorithmic/)
+directly in a chapter. Its `algorithm-figure` stays in the text column and
+provides the caption and reference target; the book style supplies chapter-based
+numbering and paragraph-sized space around figures and tables. For example:
+
+```typst
+#import "@preview/algorithmic:1.0.7" as algorithmic
+#import algorithmic: algorithm-figure
+
+As shown in @alg-example, the procedure returns its input.
+
+#algorithm-figure(
+  [An example procedure.],
+  {
+    import algorithmic: *
+    Function("Identity", ("x",), { Return[$x$] })
+  },
+) <alg-example>
+```
+
+Place a label after each `#body_diagram(...)`, `#body_figure(...)`, or
+`#body_table(...)` call to reference it with `@label`. The same convention applies
+to ordinary Typst `figure(...)` calls.
+
+For a diagram in the wide right margin, use `#margin_diagram(...)` with one
+diagram per call. Pass its related paragraph as `beside: [...]` and its reference
+label as `id: <fig-example>`. The paragraph and the complete diagram are kept
+together when the page breaks; the example in `chapters/01-sat.typ` shows both
+automata this way.
 
 ## GitHub builds and releases
 

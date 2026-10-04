@@ -33,6 +33,7 @@
 }
 
 #let document-style(body) = {
+  import "@preview/algorithmic:1.0.7": style-algorithm
   set page(
     paper: "a4",
     margin: (left: 2.4cm, right: 7cm, top: 2.5cm, bottom: 2.5cm),
@@ -65,26 +66,20 @@
     first-line-indent: (amount: 1.3em, all: true),
   )
   set heading(numbering: book-numbering)
+  show: style-algorithm
+  // One paragraph line of breathing room around every numbered object.
+  show figure: set block(above: 0.5cm, below: 0.5cm)
   show figure.where(kind: image): set figure(
     numbering: figure-numbering,
     supplement: [Fig.],
   )
-  show figure.where(kind: image): set block(below: 0.85cm)
   show figure.where(kind: table): set figure(
     numbering: figure-numbering,
     supplement: [Table],
   )
   show figure.where(kind: table): set figure.caption(position: top)
-  show figure.where(kind: table): set block(above: 0.4cm, below: 0.6cm)
   show figure.where(kind: "algorithm"): set figure(
     numbering: figure-numbering,
-    supplement: [Algorithm],
-    gap: 0.08cm,
-  )
-  show figure.where(kind: "algorithm"): set figure.caption(position: top)
-  show figure.where(kind: "algorithm"): set block(
-    above: 0.4cm,
-    below: 0.6cm,
   )
   set math.equation(numbering: equation-numbering)
   show math.equation.where(block: true): set block(above: 0.5cm, below: 0.5cm)
@@ -99,20 +94,6 @@
     set par(justify: false, first-line-indent: 0pt)
     align(center)[#strong([Table #context it.counter.display(it.numbering)]):
       #it.body]
-  }
-  show figure.caption.where(kind: "algorithm"): it => {
-    set text(size: 8pt, fill: ink)
-    set par(justify: false, first-line-indent: 0pt)
-    grid(
-      columns: (1fr,),
-      row-gutter: 0.1cm,
-      rect(width: 100%, height: 0.8pt, fill: ink, stroke: none),
-      align(left)[
-        #strong([Algorithm #context it.counter.display(it.numbering)])
-        #it.body
-      ],
-      rect(width: 100%, height: 0.5pt, fill: ink, stroke: none),
-    )
   }
   show heading.where(level: 1): it => {
     if it.numbering == none {
@@ -250,7 +231,6 @@
 ]
 
 #let front-page(title, body) = {
-  pagebreak()
   v(2cm)
   align(left)[
     #set par(first-line-indent: 0pt)
@@ -261,7 +241,6 @@
 }
 
 #let contents-page() = {
-  pagebreak()
   align(left)[
     #set par(first-line-indent: 0pt)
     #text(size: 19.5pt, weight: "bold")[Contents]
@@ -281,14 +260,13 @@
   outline(depth: 3, title: none, indent: 1.1em)
 }
 
-#let recto-break() = {
+#let blank-page-if-needed() = {
   metadata("recto-before")
   pagebreak(to: "odd")
   metadata("recto-after")
 }
 
 #let part-page(title) = {
-  recto-break()
   v(6cm)
   heading(level: 1)[#title]
 }
@@ -299,14 +277,34 @@
   block(width: margin-width)[#body],
 )
 
-#let margin_figure(path, caption: none, id: none) = outer-note([
-  #figure(image(path, width: 100%), caption: caption)
-  #if id != none { id }
-])
+// Keep each marginal figure beside its paragraph in one unbreakable row.
+// Its height participates in pagination, so neither figure nor caption can
+// extend past the bottom of a page.
+#let margin-object(beside, object) = block(width: 18.05cm, breakable: false)[
+  #grid(
+    columns: (11.6cm, margin-width),
+    column-gutter: 0.6cm,
+    beside, object,
+  )
+]
 
-#let margin_diagram(body, caption: none, alt: none, id: none) = outer-note([
+#let margin_figure(path, beside: [], caption: none, id: none) = margin-object(
+  beside,
+  [
+    #figure(image(path, width: 100%), caption: caption)
+    #id
+  ],
+)
+
+#let margin_diagram(
+  body,
+  beside: [],
+  caption: none,
+  alt: none,
+  id: none,
+) = margin-object(beside, [
   #figure(align(center, body), kind: image, caption: caption, alt: alt)
-  #if id != none { id }
+  #id
 ])
 
 #let body_figure(path, caption, width: 100%) = figure(
@@ -327,39 +325,10 @@
   caption: caption,
 )
 
-#let margin_table(data, caption, id: none) = outer-note([
+#let margin_table(data, caption, beside: [], id: none) = margin-object(beside, [
   #figure(align(center, data), kind: table, caption: caption)
-  #if id != none { id }
+  #id
 ])
-
-#let algorithm(title, lines) = figure(
-  block(width: 100%)[
-    #set text(size: 8.5pt)
-    #set par(justify: false, first-line-indent: 0pt)
-    #let cells = {
-      let result = ()
-      for (index, step) in lines.enumerate() {
-        result.push(align(right)[#text(size: 7.5pt)[#(index + 1):]])
-        result.push(pad(left: step.indent * 0.28cm)[#step.body])
-      }
-      result
-    }
-    #grid(
-      columns: (1fr,),
-      row-gutter: 0.08cm,
-      grid(
-        columns: (0.55cm, 1fr),
-        column-gutter: 0.12cm,
-        row-gutter: 0.08cm,
-        align: left,
-        ..cells,
-      ),
-      line(length: 100%, stroke: (paint: ink, thickness: 0.8pt)),
-    )
-  ],
-  kind: "algorithm",
-  caption: title,
-)
 
 #let epigraph(words, author) = align(right)[#block(width: 48%)[
   #set par(justify: false, first-line-indent: 0pt)
@@ -370,13 +339,13 @@
   #align(right)[#text(size: 7pt, fill: black)[#author]]
 ]]
 
-#let chapter-start() = {
-  recto-break()
+#let chapter(body) = {
   chapter-counter.step()
   image-counter.update(0)
   table-counter.update(0)
   algorithm-counter.update(0)
   counter(math.equation).update(0)
+  body
 }
 
 #let short-title(title) = metadata((kind: "short-title", title: title))
