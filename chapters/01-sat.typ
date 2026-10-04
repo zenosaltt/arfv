@@ -54,6 +54,10 @@ Here $F |_(l = 1)$ denotes the formula simplified after setting $l$ to true.
 
 #let automaton-style = (state: (radius: 0.4))
 
+An automaton can be described by its transition table. In this deterministic
+example, the two states record whether the number of $1$s read so far is even or
+odd. The initial and accepting state is `even` (@fig-parity-dfa).
+
 #let parity-dfa = finite.create-automaton(
   (
     even: (even: "0", odd: "1"),
@@ -69,15 +73,15 @@ Here $F |_(l = 1)$ denotes the formula simplified after setting $l$ to true.
 
 #margin_diagram(
   finite.automaton(parity-dfa, style: automaton-style),
-  beside: [
-    An automaton can be described by its transition table. In this deterministic
-    example, the two states record whether the number of $1$s read so far is
-    even or odd. The initial and accepting state is `even` (@fig-parity-dfa).
-  ],
   caption: [A DFA for words with an even number of $1$s.],
   alt: "Two-state deterministic automaton for the parity of 1s",
   id: <fig-parity-dfa>,
 )
+
+The same notation also permits several transitions with the same input. This
+nondeterministic automaton recognizes words ending in `ab`: from `start`, it may
+stay put or guess that the current `a` begins the final suffix
+(@fig-suffix-nfa).
 
 #let suffix-nfa = finite.create-automaton(
   (
@@ -91,12 +95,6 @@ Here $F |_(l = 1)$ denotes the formula simplified after setting $l$ to true.
 
 #margin_diagram(
   finite.automaton(suffix-nfa, style: automaton-style),
-  beside: [
-    The same notation also permits several transitions with the same input. This
-    nondeterministic automaton recognizes words ending in `ab`: from `start`, it
-    may stay put or guess that the current `a` begins the final suffix
-    (@fig-suffix-nfa).
-  ],
   caption: [An NFA for words ending in `ab`.],
   alt: "Three-state nondeterministic automaton with a branch on a",
   id: <fig-suffix-nfa>,

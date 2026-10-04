@@ -1,3 +1,6 @@
+#import "@preview/marginalia:0.3.1" as marginalia
+
+// Shared palette, margin width, and counters for chapter-scoped numbering.
 #let ink = rgb("25344a")
 // Change this value to recolor the cover and the book's accent details.
 #let accent = rgb("#3e84d4")
@@ -32,6 +35,8 @@
   }
 }
 
+// Apply page geometry, typography, numbering, captions, and heading styles.
+// Wrap the whole document with `#show: document-style` in main.typ.
 #let document-style(body) = {
   import "@preview/algorithmic:1.0.7": style-algorithm
   set page(
@@ -66,6 +71,15 @@
     first-line-indent: (amount: 1.3em, all: true),
   )
   set heading(numbering: book-numbering)
+  // Reserve the wide outer margin for notes and marginal figures.
+  show: marginalia.setup.with(
+    inner: (far: 2.4cm, width: 0cm, sep: 0cm),
+    outer: (far: 0.55cm, width: margin-width, sep: 0.6cm),
+    top: 2.5cm,
+    bottom: 2.5cm,
+    book: false,
+    clearance: 0.5cm,
+  )
   show: style-algorithm
   // One paragraph line of breathing room around every numbered object.
   show figure: set block(above: 0.5cm, below: 0.5cm)
@@ -135,6 +149,7 @@
   body
 }
 
+// Standalone cover; artwork and release-tag are optional.
 #let cover-page(
   title,
   author,
@@ -219,6 +234,7 @@
   }
 ]
 
+// Standalone page with the compilation date.
 #let build-page() = page(
   paper: "a4",
   margin: 0pt,
@@ -230,6 +246,7 @@
   #align(center + horizon)[Last build: #datetime.today().display()]
 ]
 
+// Titled front-matter page for prose such as the preface or notes.
 #let front-page(title, body) = {
   v(2cm)
   align(left)[
@@ -240,6 +257,7 @@
   body
 }
 
+// Contents list: parts, chapters, and sections up to level 3.
 #let contents-page() = {
   align(left)[
     #set par(first-line-indent: 0pt)
@@ -260,53 +278,69 @@
   outline(depth: 3, title: none, indent: 1.1em)
 }
 
+// Start the next part or chapter on an odd (right-hand) page.
 #let blank-page-if-needed() = {
   metadata("recto-before")
   pagebreak(to: "odd")
   metadata("recto-after")
 }
 
+// Part title page; the caller controls its page break.
 #let part-page(title) = {
   v(6cm)
   heading(level: 1)[#title]
 }
 
+// Place chapter navigation in the outer margin without using text-column space.
 #let outer-note(body) = place(
   right,
   dx: 6.45cm,
   block(width: margin-width)[#body],
 )
 
-// Keep each marginal figure beside its paragraph in one unbreakable row.
-// Its height participates in pagination, so neither figure nor caption can
-// extend past the bottom of a page.
-#let margin-object(beside, object) = block(width: 18.05cm, breakable: false)[
-  #grid(
-    columns: (11.6cm, margin-width),
-    column-gutter: 0.6cm,
-    beside, object,
+// Format the captions passed to Marginalia image figures.
+#let margin-caption(number, caption) = {
+  set text(size: 7.25pt, fill: black)
+  set par(justify: true, first-line-indent: 0pt)
+  align(left)[#strong([Fig. #context caption.counter.display(
+        caption.numbering,
+      )]):
+    #caption.body]
+}
+
+// Add an image file in the right margin; `id` makes it referenceable.
+#let margin_figure(path, caption: none, id: none) = [
+  #marginalia.notefigure(
+    image(path, width: 100%),
+    caption: caption,
+    side: "right",
+    alignment: "top",
+    shift: true,
+    keep-order: true,
+    show-caption: margin-caption,
+    text-style: (size: 8pt),
   )
+  #id
 ]
 
-#let margin_figure(path, beside: [], caption: none, id: none) = margin-object(
-  beside,
-  [
-    #figure(image(path, width: 100%), caption: caption)
-    #id
-  ],
-)
-
-#let margin_diagram(
-  body,
-  beside: [],
-  caption: none,
-  alt: none,
-  id: none,
-) = margin-object(beside, [
-  #figure(align(center, body), kind: image, caption: caption, alt: alt)
+// Add generated Typst content as a right-margin figure; supply alt text.
+#let margin_diagram(body, caption: none, alt: none, id: none) = [
+  #marginalia.notefigure(
+    align(center, body),
+    kind: image,
+    caption: caption,
+    alt: alt,
+    side: "right",
+    alignment: "top",
+    shift: true,
+    keep-order: true,
+    show-caption: margin-caption,
+    text-style: (size: 8pt),
+  )
   #id
-])
+]
 
+// Text-column image, diagram, and table; append <label> to reference one.
 #let body_figure(path, caption, width: 100%) = figure(
   image(path, width: width),
   caption: caption,
@@ -325,11 +359,22 @@
   caption: caption,
 )
 
-#let margin_table(data, caption, beside: [], id: none) = margin-object(beside, [
-  #figure(align(center, data), kind: table, caption: caption)
+// Add a table in the right margin; `id` makes it referenceable.
+#let margin_table(data, caption, id: none) = [
+  #marginalia.notefigure(
+    align(center, data),
+    kind: table,
+    caption: caption,
+    side: "right",
+    alignment: "top",
+    shift: true,
+    keep-order: true,
+    text-style: (size: 8pt),
+  )
   #id
-])
+]
 
+// Short quotation aligned to the right, usable on front or chapter pages.
 #let epigraph(words, author) = align(right)[#block(width: 48%)[
   #set par(justify: false, first-line-indent: 0pt)
   #align(left)[#text(size: 7.5pt, style: "italic")[#words]]
@@ -339,6 +384,7 @@
   #align(right)[#text(size: 7pt, fill: black)[#author]]
 ]]
 
+// Wrap a chapter to advance its number and reset local object counters.
 #let chapter(body) = {
   chapter-counter.step()
   image-counter.update(0)
@@ -348,8 +394,11 @@
   body
 }
 
+// Override a long section title in the chapter's margin contents.
 #let short-title(title) = metadata((kind: "short-title", title: title))
 
+// Add margin contents and an optional opening quote after a chapter heading.
+// Sections are collected up to the next chapter or part heading.
 #let chapter-opening(quote: none, author: none) = context {
   let major = heading.where(level: 1).or(heading.where(level: 2))
   let next-major = query(selector(major).after(here())).first(default: none)
