@@ -123,3 +123,16 @@ typst watch --input "release-tag=$release_tag" main.typ "$output"
 
 Set `release_tag=v1.0.0` in either example to include the version in the PDF
 name and on its cover.
+
+## License
+
+© 2026 Zeno Saletti. The original text, illustrations, and cover photograph
+(`images/broadperspective.jpg`) are by Zeno Saletti and licensed, along with
+their Typst sources and generated PDF, under
+[Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/).
+See [LICENSE](LICENSE) for the legal text.
+
+Third-party course materials and other third-party content are not covered by
+the CC BY-SA license unless explicitly stated otherwise.
+
+[![CC BY-SA 4.0](https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
