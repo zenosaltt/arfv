@@ -13,14 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Install Typstyle
-        run: bash .github/scripts/install-typstyle.sh
       - name: Check Typst formatting
         run: make format-check
-      - name: Build PDF and report Typst diagnostics
-        run: python3 .github/scripts/build-with-diagnostics.py make docker-build
+      - name: Check English spelling and grammar
+        run: make prose-check
+      - name: Build PDF
+        run: make build
       - uses: actions/upload-artifact@v7
         with:
           name: document-preview
-          path: build/document.pdf
+          path: build/ARFV-Notes_*.pdf
           if-no-files-found: error

@@ -1,35 +1,40 @@
 SOURCE := main.typ
-OUTPUT := build/document.pdf
-TYPSTYLE ?= typstyle
-TYPST_SOURCES := $(shell find . -type f -name '*.typ' -not -path './.git/*' -not -path './build/*')
-TYPST_IMAGE := ghcr.io/typst/typst:0.15.1
+BUILD_DATE := $(shell date +%d%m%y)
+OUTPUT = build/ARFV-Notes_$${RELEASE_TAG:+$${RELEASE_TAG}_}$(BUILD_DATE).pdf
+TYPST_SOURCES := $(shell find . -type f -name '*.typ' -not -path './.git/*' -not -path './build/*' -not -path './.cache/*')
+TOOLS_IMAGE := arfv-tools:0.15.1
 FONT_PATH := fonts
 TYPST_DIAGNOSTIC_FORMAT ?= human
-DOCKER_OPTIONS = --user "$$(id -u):$$(id -g)" --env HOME=/tmp --mount "type=bind,source=$(CURDIR),target=/work" --workdir /work
-DOCKER_RUN = docker run --rm $(DOCKER_OPTIONS) $(TYPST_IMAGE)
+DOCKER_OPTIONS = --user "$$(id -u):$$(id -g)" --env HOME=/tmp --env XDG_CACHE_HOME=/work/.cache --mount "type=bind,source=$(CURDIR),target=/work" --workdir /work
+DOCKER_RUN = docker run --rm $(DOCKER_OPTIONS) $(TOOLS_IMAGE)
 export RELEASE_TAG
 
-.PHONY: build watch docker-build format format-check clean
+.PHONY: docker-image build watch docker-build format format-check prose-check clean
 
-format:
-	$(TYPSTYLE) --line-width 80 --wrap-text=fill --inplace $(TYPST_SOURCES)
-	python3 .github/scripts/check-line-width.py $(TYPST_SOURCES)
+docker-image:
+	docker build --tag $(TOOLS_IMAGE) .
 
-format-check:
-	$(TYPSTYLE) --line-width 80 --wrap-text=fill --check $(TYPST_SOURCES)
-	python3 .github/scripts/check-line-width.py $(TYPST_SOURCES)
+format: docker-image
+	$(DOCKER_RUN) typstyle --line-width 80 --wrap-text=fill --inplace $(TYPST_SOURCES)
+	$(DOCKER_RUN) python3 .github/scripts/check-line-width.py $(TYPST_SOURCES)
 
-build:
+format-check: docker-image
+	$(DOCKER_RUN) typstyle --line-width 80 --wrap-text=fill --check $(TYPST_SOURCES)
+	$(DOCKER_RUN) python3 .github/scripts/check-line-width.py $(TYPST_SOURCES)
+
+prose-check: docker-image
+	$(DOCKER_RUN) sh -c 'test -d .github/vale/Harper || vale sync'
+	$(DOCKER_RUN) vale README.md $(TYPST_SOURCES)
+
+build: docker-image
 	mkdir -p build
-	typst compile --font-path $(FONT_PATH) --diagnostic-format $(TYPST_DIAGNOSTIC_FORMAT) --input "release-tag=$${RELEASE_TAG}" $(SOURCE) $(OUTPUT)
+	$(DOCKER_RUN) typst compile --font-path $(FONT_PATH) --diagnostic-format $(TYPST_DIAGNOSTIC_FORMAT) --input "release-tag=$${RELEASE_TAG}" $(SOURCE) "$(OUTPUT)"
 
-watch:
+watch: docker-image
 	mkdir -p build
-	typst watch --font-path $(FONT_PATH) --diagnostic-format $(TYPST_DIAGNOSTIC_FORMAT) --input "release-tag=$${RELEASE_TAG}" $(SOURCE) $(OUTPUT)
+	$(DOCKER_RUN) typst watch --font-path $(FONT_PATH) --diagnostic-format $(TYPST_DIAGNOSTIC_FORMAT) --input "release-tag=$${RELEASE_TAG}" $(SOURCE) "$(OUTPUT)"
 
-docker-build:
-	mkdir -p build
-	$(DOCKER_RUN) compile --font-path $(FONT_PATH) --diagnostic-format $(TYPST_DIAGNOSTIC_FORMAT) --input "release-tag=$${RELEASE_TAG}" $(SOURCE) $(OUTPUT)
+docker-build: build
 
 clean:
-	rm -f $(OUTPUT)
+	rm -f build/ARFV-Notes_*.pdf build/document.pdf
