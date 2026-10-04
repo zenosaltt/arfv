@@ -29,9 +29,10 @@ Rust installation is needed on the host. Other useful commands:
 - `make clean`: remove generated PDFs from `build/`.
 
 For a tagged cover, run `RELEASE_TAG=v1.0.0 make build`. The output becomes
-`build/ARFV-Notes_v1.0.0_ddmmyy.pdf`; the PDF displays `RELEASE v1.0.0` on
+`build/ARFV-Notes_v1.0.0_ddmmyy.pdf`; the PDF displays `VERSION v1.0.0` on
 the cover and the compilation date on the next page. `RELEASE_TAG` does not
-create a Git tag or release.
+create a Git tag or release. Without a tag, the cover shows `DRAFT` and the
+build date.
 
 ## Find and edit content
 
@@ -40,7 +41,7 @@ create a Git tag or release.
 - `frontmatter/` holds the cover, preface, notes, contents, and other opening
   pages; `chapters/` holds the chapters; `backmatter/` holds references.
 - `styles/book.typ` defines the layout and reusable elements. `bibliography.bib`
-  holds citation data; `images/` and `fonts/` hold local assets.
+  holds citation data; `images/` holds the cover photo and other local assets.
 
 To add a chapter, create a `.typ` file in `chapters/` with a `==` heading and
 `#chapter-opening()` (imported from `styles/book.typ`). Then add it at the
@@ -104,7 +105,7 @@ root, run:
 mkdir -p build
 release_tag=
 output="build/ARFV-Notes_${release_tag:+${release_tag}_}$(date +%d%m%y).pdf"
-typst compile --font-path fonts --input "release-tag=$release_tag" main.typ "$output"
+typst compile --input "release-tag=$release_tag" main.typ "$output"
 typstyle --line-width 80 --wrap-text=fill --inplace $(find . -name '*.typ' -not -path './build/*' -not -path './.cache/*')
 typstyle --line-width 80 --wrap-text=fill --check $(find . -name '*.typ' -not -path './build/*' -not -path './.cache/*')
 python3 .github/scripts/check-line-width.py $(find . -name '*.typ' -not -path './build/*' -not -path './.cache/*')
@@ -117,7 +118,7 @@ For live rebuilding, run this command on its own:
 ```sh
 release_tag=
 output="build/ARFV-Notes_${release_tag:+${release_tag}_}$(date +%d%m%y).pdf"
-typst watch --font-path fonts --input "release-tag=$release_tag" main.typ "$output"
+typst watch --input "release-tag=$release_tag" main.typ "$output"
 ```
 
 Set `release_tag=v1.0.0` in either example to include the version in the PDF
