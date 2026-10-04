@@ -234,7 +234,7 @@
   }
 ]
 
-// Standalone page with the compilation date.
+// Standalone colophon with build date and license notice.
 #let build-page() = page(
   paper: "a4",
   margin: 0pt,
@@ -243,7 +243,31 @@
   numbering: none,
 )[
   #set par(justify: false, first-line-indent: 0pt)
-  #align(center + horizon)[Last build: #datetime.today().display()]
+  #align(center + horizon)[
+    #text(size: 9pt)[Last build: #datetime.today().display()]
+    #v(1.2cm)
+    #text(size: 9pt)[© 2026 Zeno Saletti]
+    #v(0.35cm)
+    #text(size: 9pt)[
+      Original text and illustrations licensed under \
+      #link("https://creativecommons.org/licenses/by-sa/4.0/")[Creative Commons
+        Attribution-ShareAlike 4.0 International]
+    ]
+    #v(0.2cm)
+    #text(size: 8pt)[
+      #link("https://creativecommons.org/licenses/by-sa/4.0/")[
+        creativecommons.org/licenses/by-sa/4.0/
+      ]
+    ]
+    #v(0.45cm)
+    #link("https://creativecommons.org/licenses/by-sa/4.0/")[
+      #image("../images/cc-by-sa.svg", width: 88pt)
+    ]
+    #v(0.7cm)
+    #text(size: 7.5pt)[
+      Third-party content and fonts retain their respective licenses.
+    ]
+  ]
 ]
 
 // Titled front-matter page for prose such as the preface or notes.
