@@ -62,8 +62,9 @@ without reserving text-column space. See `chapters/01-sat.typ` for diagram and
 
 ## GitHub builds and releases
 
-The build workflow runs after a pull request is **merged into `main`**. It checks
-formatting, builds the PDF, and uploads a temporary `document-preview` artifact.
-It does not run for every push or open pull request. Pushing a Git tag runs the
+The build workflow runs when a pull request targeting `main` is opened or
+updated. It checks formatting, builds the PDF, and uploads a temporary
+`document-preview` artifact. Protect `main` by requiring a PR and its `build`
+check in GitHub's branch rules. Pushing a Git tag runs the separate
 release workflow, which builds a tagged cover and creates a GitHub Release with
 `document.pdf` attached.
