@@ -1,70 +1,73 @@
 # Automated Reasoning and Formal Verification
 
-Typst source for the UniTN 2026/27 ARFV notes, based on
-[Prof. Sebastiani's course material](https://disi.unitn.it/rseba/DIDATTICA/arfv2026/SLIDES/).
-This is a draft: the SAT chapter contains a DPLL example and diagram samples;
-the SMT and CTL chapters currently contain headings only. The disclaimer and
-notes contain placeholder text, and the preface and chapter quotations are
-samples.
+Source for the UniTN 2026/27 ARFV notes, written in
+[Typst](https://typst.app/docs/) and based on
+[Prof. Sebastiani's course material](https://disi.unitn.it/rseba/DIDATTICA/arfv2026/SLIDES/)
+and lectures.
 
-## Build
+## Get started
 
-From the repository root, run `make docker-build` to write
-`build/document.pdf`. This uses Docker and the pinned Typst 0.15.1 image. With
-Typst 0.15.1 installed locally, use `make build` or `make watch`. All builds use
-`main.typ` and the bundled `fonts/` directory. `make clean` removes the PDF.
+You can find the latest release (i.e., the latest PDF built by collaborators of this repository) in the Release page. Releases, are, however, less frequent than minor, and sometimes, major updates to these notes, thus you may want to build the PDF on your own. To accomplish this, you need at least Git, Make, and Docker to build the book without much effort. Don't worry, this is not LaTeX: it is going to be as easy as taking a walk around Povo 1:
 
-Set `RELEASE_TAG=v1.0.0` before a build to print `RELEASE v1.0.0` on the cover.
-The next page shows the compilation date. The tag input changes only the PDF;
-it does not create a Git tag or GitHub Release.
+```sh
+# WARNING: we assume you are working inside a UNIX-like environment (e.g. Linux & macOS)
 
-To format sources, install [Typstyle 0.15.1](https://github.com/typstyle-rs/typstyle/releases/tag/v0.15.1)
-and run `make format`. `make format-check` checks formatting and the 80-character
-line limit. The optional [Tinymist](https://marketplace.visualstudio.com/items?itemName=myriad-dreamin.tinymist)
-settings in `.vscode/` use `main.typ` as the entry point.
+# Requirement 0: make sure Git, Make, and Docker are installed
+# Requirement 1: Clone this repository first
 
-## Edit the book
+# Inside the repository root:
+make docker-build
+```
 
-`main.typ` sets reading order and explicit page breaks. `frontmatter/` contains
-the cover, build date, disclaimer, preface, notes, and contents; `chapters/`
-contains the three chapters; `backmatter/` contains references. Layout and
-reusable page elements are in `styles/book.typ`.
+The result is `build/document.pdf`. This command uses the pinned Typst 0.15.1
+Docker image and the fonts in `fonts/`, so a local Typst installation is not
+required. Other useful commands:
 
-To add a chapter, create a file with a level-2 heading (`==`) followed by
-`#chapter-opening()`, then add it in `main.typ`:
+- `make build`: build with a locally installed Typst 0.15.1.
+- `make watch`: rebuild after each save, using local Typst 0.15.1.
+- `make clean`: remove the generated PDF.
+
+For a tagged cover, run `RELEASE_TAG=v1.0.0 make docker-build`. The PDF will
+display `RELEASE v1.0.0` on the cover and the compilation date on the next page.
+`RELEASE_TAG` changes the PDF only; it does not create a Git tag or release.
+
+## Find and edit content
+
+- `main.typ` is the entry point: it includes files in reading order and places
+  page breaks between parts and chapters.
+- `frontmatter/` holds the cover, preface, notes, contents, and other opening
+  pages; `chapters/` holds the chapters; `backmatter/` holds references.
+- `styles/book.typ` defines the layout and reusable elements. `bibliography.bib`
+  holds citation data; `images/` and `fonts/` hold local assets.
+
+Typst uses `==` for a chapter heading here and `===` for a section. A `#` calls
+a function or includes a file, while `@key` refers to a labeled figure or a
+bibliography entry.
+
+To add a chapter, create a `.typ` file in `chapters/` with a `==` heading and
+`#chapter-opening()` (imported from `styles/book.typ`). Then add it at the
+appropriate point in `main.typ`:
 
 ```typst
 #blank-page-if-needed()
 #chapter([#include "chapters/new-chapter.typ"])
 ```
 
-`#blank-page-if-needed()` starts on a right-hand page; `#chapter(...)` advances
-the chapter number and resets figure, table, algorithm, and equation numbers.
-Use `#part-page("Title")` after a right-hand page break for a new part.
+The first call starts the chapter on a right-hand page; the second applies
+chapter numbering. Import only the helpers and Typst packages your chapter
+uses. Common helpers in `styles/book.typ` include `#body_figure(...)` and
+`#margin_figure(...)` for figures, the corresponding `*_diagram` and
+`*_table` helpers, and `#short-title[Short title]` for the margin contents.
+See their definitions or existing chapters for arguments and examples.
 
-Available elements from `styles/book.typ`:
+## Checks, previews, and releases
 
-| Element | Use |
-| --- | --- |
-| `#front-page(title, body)` | Titled front-matter prose page |
-| `#contents-page()` | Contents through section level |
-| `#chapter-opening(quote: ..., author: ...)` | Chapter margin contents and optional epigraph |
-| `#short-title[Title]` | Shorten a section title in the margin contents |
-| `#body_figure(...)`, `#body_diagram(...)`, `#body_table(...)` | Image, generated diagram, or table in the text column |
-| `#margin_figure(...)`, `#margin_diagram(...)`, `#margin_table(...)` | Figure or table in the right margin |
-| `#epigraph(words, author)` | Small quotation with attribution |
+Install [Typstyle 0.15.1](https://github.com/typstyle-rs/typstyle/releases/tag/v0.15.1)
+to run `make format` before a pull request. `make format-check` checks that
+formatting and the 80-character line limit. The optional VS Code settings in
+`.vscode/` use Tinymist with `main.typ` as the entry point.
 
-Append `<label>` after a body figure or algorithm to reference it with `@label`.
-For marginal figures and tables, pass `id: <label>`. The marginal helpers use
-[Marginalia](https://typst.app/universe/package/marginalia/) to position items
-without reserving text-column space. See `chapters/01-sat.typ` for diagram and
-[algorithmic](https://typst.app/universe/package/algorithmic/) examples.
-
-## GitHub builds and releases
-
-The build workflow runs when a pull request targeting `main` is opened or
-updated. It checks formatting, builds the PDF, and uploads a temporary
-`document-preview` artifact. Protect `main` by requiring a PR and its `build`
-check in GitHub's branch rules. Pushing a Git tag runs the separate
-release workflow, which builds a tagged cover and creates a GitHub Release with
-`document.pdf` attached.
+Pull requests targeting `main` run the format check and PDF build; download
+the `document-preview` artifact from the workflow run to inspect the result.
+To publish a version, push a Git tag: the release workflow builds a PDF with
+that tag on the cover and attaches `document.pdf` to a GitHub Release.

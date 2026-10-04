@@ -6,8 +6,7 @@
 #import algorithmic: algorithm-figure
 #import "@preview/typed-dsa:0.6.0": bst, graph
 
-== Propositional Satisfiability (SAT) <ch-propositional-satisfiability>
-
+== Propositional Satisfiability (SAT)
 #chapter-opening(
   quote: [This chapter deserves a quote.],
   author: [Me.],
@@ -20,6 +19,24 @@
 ==== Resolution
 ==== Tableaux
 ==== DPLL
+=== Ordered binary decision diagrams (OBDDs)
+#short-title[Ordered binary decision diagrams]
+=== Modern CDCL SAT solvers
+=== SAT functionalities: proofs, unsat scores, optimization
+#short-title[SAT functionalities]
+
+
+
+
+
+
+
+
+
+
+
+
+=== Useful Examples
 
 The recursive outline in @alg-dpll checks for a satisfied formula or a conflict,
 propagates unit clauses, and then branches on a variable.
@@ -41,16 +58,6 @@ propagates unit clauses, and then branches on a variable.
 ) <alg-dpll>
 
 Here $F |_(l = 1)$ denotes the formula simplified after setting $l$ to true.
-
-=== Ordered binary decision diagrams (OBDDs)
-#short-title[Ordered binary decision diagrams]
-
-=== Modern CDCL SAT solvers
-
-=== SAT functionalities: proofs, unsat scores, optimization
-#short-title[SAT functionalities]
-
-=== Finite automata with Finite
 
 #let automaton-style = (state: (radius: 0.4))
 
