@@ -3,5 +3,11 @@
 
 # Local files
 .DS_Store
+.cache/
 .vscode/*
 !.vscode/settings.json
+
+# Vale packages downloaded by `vale sync`
+.github/vale/Harper/
+.github/vale/.vale-config/
+.github/vale/config/dictionaries/
