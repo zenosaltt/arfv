@@ -203,8 +203,10 @@
     #v(1.2cm)
     #text(size: 9pt)[© 2026 Zeno Saletti]
     #v(0.35cm)
+    #text(size: 9pt)[Cover photograph: Zeno Saletti]
+    #v(0.35cm)
     #text(size: 9pt)[
-      Original text and illustrations licensed under \
+      Original text, illustrations, and cover photograph licensed under \
       #link("https://creativecommons.org/licenses/by-sa/4.0/")[Creative Commons
         Attribution-ShareAlike 4.0 International]
     ]
@@ -220,7 +222,7 @@
     ]
     #v(0.7cm)
     #text(size: 7.5pt)[
-      Third-party content and fonts retain their respective licenses.
+      Third-party content retains its respective license.
     ]
   ]
 ]
