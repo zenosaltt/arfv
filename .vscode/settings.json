@@ -1,5 +1,5 @@
 {
-  "tinymist.typstExtraArgs": ["main.typ"],
+  "tinymist.typstExtraArgs": ["src/main.typ"],
   "tinymist.formatterMode": "typstyle",
   "tinymist.formatterPrintWidth": 80,
   "tinymist.formatterProseWrap": true,

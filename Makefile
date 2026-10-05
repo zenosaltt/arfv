@@ -1,7 +1,7 @@
-SOURCE := main.typ
+SOURCE := src/main.typ
 BUILD_DATE := $(shell date +%d%m%y)
 OUTPUT = build/ARFV-Notes_$${RELEASE_TAG:+$${RELEASE_TAG}_}$(BUILD_DATE).pdf
-TYPST_SOURCES := $(shell find . -type f -name '*.typ' -not -path './.git/*' -not -path './build/*' -not -path './.cache/*')
+TYPST_SOURCES := $(shell find src -type f -name '*.typ')
 TOOLS_IMAGE := arfv-tools:0.15.1
 TYPST_DIAGNOSTIC_FORMAT ?= human
 DOCKER_OPTIONS = --user "$$(id -u):$$(id -g)" --env HOME=/tmp --env XDG_CACHE_HOME=/work/.cache --mount "type=bind,source=$(CURDIR),target=/work" --workdir /work

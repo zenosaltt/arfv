@@ -1,4 +1,4 @@
-#import "../styles/book.typ": (
+#import "../assets/styles/book.typ": (
   body_diagram, chapter-opening, margin_diagram, short-title,
 )
 #import "@preview/finite:0.5.1" as finite

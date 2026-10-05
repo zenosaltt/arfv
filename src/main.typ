@@ -1,4 +1,4 @@
-#import "styles/book.typ": (
+#import "assets/styles/book.typ": (
   blank-page-if-needed, chapter, document-style, part-page,
 )
 

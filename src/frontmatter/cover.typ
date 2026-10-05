@@ -1,4 +1,4 @@
-#import "../styles/book.typ": cover-page
+#import "../assets/styles/book.typ": cover-page
 
 #cover-page(
   [

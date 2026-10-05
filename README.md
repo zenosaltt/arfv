@@ -36,16 +36,18 @@ build date.
 
 ## Find and edit content
 
-- `main.typ` is the entry point: it includes files in reading order and places
-  page breaks between parts and chapters.
-- `frontmatter/` holds the cover, preface, notes, contents, and other opening
-  pages; `chapters/` holds the chapters; `backmatter/` holds references.
-- `styles/book.typ` defines the layout and reusable elements. `bibliography.bib`
-  holds citation data; `images/` holds the cover photo and other local assets.
+- `src/main.typ` is the entry point: it includes files in reading order and
+  places page breaks between parts and chapters.
+- `src/frontmatter/` holds the cover, preface, notes, contents, and other
+  opening pages; `src/chapters/` holds the chapters; `src/backmatter/` holds
+  references.
+- `src/assets/styles/book.typ` defines the layout and reusable elements.
+  `src/bibliography.bib` holds citation data; `src/assets/images/` holds the
+  cover photo and other local assets.
 
-To add a chapter, create a `.typ` file in `chapters/` with a `==` heading and
-`#chapter-opening()` (imported from `styles/book.typ`). Then add it at the
-appropriate point in `main.typ`:
+To add a chapter, create a `.typ` file in `src/chapters/` with a `==` heading
+and `#chapter-opening()` (imported from `../assets/styles/book.typ`). Then add
+it at the appropriate point in `src/main.typ`:
 
 ```typst
 #blank-page-if-needed()
@@ -53,9 +55,10 @@ appropriate point in `main.typ`:
 ```
 
 The first call starts the chapter on a right-hand page; the second applies
-chapter numbering. Common helpers in `styles/book.typ` include `#body_figure(...)` and
-`#margin_figure(...)` for figures, the corresponding `*_diagram` and
-`*_table` helpers, and `#short-title[Short title]` for the margin contents.
+chapter numbering. Common helpers in `src/assets/styles/book.typ` include
+`#body_figure(...)` and `#margin_figure(...)` for figures, the corresponding
+`*_diagram` and `*_table` helpers, and `#short-title[Short title]` for the
+margin contents.
 See their definitions or existing chapters for arguments and examples.
 
 ## Checks, previews, and releases
@@ -70,7 +73,7 @@ make build
 
 Vale skips Typst code and math. If a valid course term is marked as misspelled,
 add it to `.github/vale/config/vocabularies/ARFV/accept.txt`.
-The optional VS Code settings in `.vscode/` use Tinymist with `main.typ` as
+The optional VS Code settings in `.vscode/` use Tinymist with `src/main.typ` as
 the entry point.
 
 Pull requests targeting `main` run the format and English checks and build the
@@ -105,12 +108,12 @@ root, run:
 mkdir -p build
 release_tag=
 output="build/ARFV-Notes_${release_tag:+${release_tag}_}$(date +%d%m%y).pdf"
-typst compile --input "release-tag=$release_tag" main.typ "$output"
-typstyle --line-width 80 --wrap-text=fill --inplace $(find . -name '*.typ' -not -path './build/*' -not -path './.cache/*')
-typstyle --line-width 80 --wrap-text=fill --check $(find . -name '*.typ' -not -path './build/*' -not -path './.cache/*')
-python3 .github/scripts/check-line-width.py $(find . -name '*.typ' -not -path './build/*' -not -path './.cache/*')
+typst compile --input "release-tag=$release_tag" src/main.typ "$output"
+typstyle --line-width 80 --wrap-text=fill --inplace $(find src -name '*.typ')
+typstyle --line-width 80 --wrap-text=fill --check $(find src -name '*.typ')
+python3 .github/scripts/check-line-width.py $(find src -name '*.typ')
 vale sync
-vale README.md $(find . -name '*.typ' -not -path './build/*' -not -path './.cache/*')
+vale README.md $(find src -name '*.typ')
 ```
 
 For live rebuilding, run this command on its own:
@@ -118,7 +121,7 @@ For live rebuilding, run this command on its own:
 ```sh
 release_tag=
 output="build/ARFV-Notes_${release_tag:+${release_tag}_}$(date +%d%m%y).pdf"
-typst watch --input "release-tag=$release_tag" main.typ "$output"
+typst watch --input "release-tag=$release_tag" src/main.typ "$output"
 ```
 
 Set `release_tag=v1.0.0` in either example to include the version in the PDF
@@ -127,8 +130,8 @@ name and on its cover.
 ## License
 
 © 2026 Zeno Saletti. The original text, illustrations, and cover photograph
-(`images/broadperspective.jpg`) are by Zeno Saletti and licensed, along with
-their Typst sources and generated PDF, under
+(`src/assets/images/broadperspective.jpg`) are by Zeno Saletti and licensed,
+along with their Typst sources and generated PDF, under
 [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/).
 See [LICENSE](LICENSE) for the legal text.
 
