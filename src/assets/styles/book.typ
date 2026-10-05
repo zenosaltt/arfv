@@ -203,7 +203,8 @@
     #v(1.2cm)
     #text(size: 9pt)[© 2026 Zeno Saletti]
     #v(0.35cm)
-    #text(size: 9pt)[Cover photograph: Zeno Saletti]
+    #text(size: 9pt)[Cover photograph: _The Broad_, by Zeno Saletti. Los
+      Angeles, CA, May 2026.]
     #v(0.35cm)
     #text(size: 9pt)[
       Original text, illustrations, and cover photograph licensed under \
