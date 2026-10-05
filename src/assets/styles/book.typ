@@ -3,7 +3,7 @@
 // Shared palette, margin width, and counters for chapter-scoped numbering.
 #let ink = rgb("25344a")
 // Accent color for book details.
-#let accent = rgb("#3e84d4")
+#let accent = rgb("25344a")
 #let margin-width = 5.85cm
 #let chapter-counter = counter("chapter")
 #let image-counter = counter(figure.where(kind: image))
