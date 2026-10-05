@@ -1,4 +1,4 @@
-#import "../styles/book.typ": chapter-opening, short-title
+#import "../assets/styles/book.typ": chapter-opening, short-title
 
 == Satisfiability Modulo Theories (SMT)
 
