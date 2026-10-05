@@ -23,7 +23,7 @@ format-check: docker-image
 
 prose-check: docker-image
 	@$(DOCKER_RUN) sh -c 'test -d .github/vale/Harper || vale sync'
-	@$(DOCKER_RUN) vale README.md $(TYPST_SOURCES)
+	@$(DOCKER_RUN) vale README.md CONTRIBUTING.md $(TYPST_SOURCES)
 
 check:
 	@log=$$(mktemp) || exit 1; trap 'rm -f "$$log"' 0; \
