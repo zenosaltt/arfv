@@ -26,6 +26,9 @@ Rust installation is needed on the host. Other useful commands:
 - `make format-check`: check Typst formatting and the 80-character line limit.
 - `make prose-check`: check English spelling and grammar in the README and Typst
   sources. The first run downloads the pinned Harper rules inside Docker.
+- `make check`: run formatting, prose, and build checks together. It prints one
+  line per result and shows tool output only when a check fails. Terminal colors
+  are used when supported.
 - `make clean`: remove generated PDFs from `build/`.
 
 For a tagged cover, run `RELEASE_TAG=v1.0.0 make build`. The output becomes
@@ -66,10 +69,12 @@ See their definitions or existing chapters for arguments and examples.
 Before a pull request, run the same checks used in CI:
 
 ```sh
-make format-check
-make prose-check
-make build
+make check
 ```
+
+The command runs all three checks even if one fails and exits with an error if
+any check fails. Run `make format-check`, `make prose-check`, or `make build`
+individually when checking a specific change.
 
 Vale skips Typst code and math. If a valid course term is marked as misspelled,
 add it to `.github/vale/config/vocabularies/ARFV/accept.txt`.
