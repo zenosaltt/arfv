@@ -24,9 +24,9 @@ page shows the date when the PDF was built.
 Since releases are less frequent than commits, you may want to build the PDF
 yourself. On Linux, macOS, or WSL for Windows, install:
 
-- Git to clone this repository and maintain a local copy.
-- Make to run the project commands.
-- Docker to run the tools without installing them individually.
+- _Git_ to clone this repository and maintain a local copy.
+- _Make_ to run the project commands.
+- _Docker_ to run the tools without installing them individually.
 
 Then clone the repository and, from its root, run:
 
