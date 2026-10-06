@@ -15,5 +15,3 @@
 === CTL model checking with fair Kripke models
 #index("CTL model checking", "with fair Kripke models")
 #short-title[Fair Kripke models]
-=== Exercises
-A newterm#index("newterm") is a new term used in this chapter.
