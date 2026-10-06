@@ -1,3 +1,5 @@
+![banner]()
+
 # Automated Reasoning and Formal Verification
 
 Source for the _Automated Reasoning & Formal Verification_ (ARFV) notes, written in
