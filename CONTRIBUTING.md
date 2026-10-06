@@ -54,7 +54,7 @@ Here is a breakdown of the check pipeline (you can run each of them separately, 
 * `make prose-check`: looks for typos and inconsistencies of the English plain text inside each source file. It skips Typst code and math. If a valid term is marked as misspelled, add it to `.github/vale/config/vocabularies/ARFV/accept.txt`.
 * `make build`: tries to build the PDF from the Typst source files and additional assets.
 
-Pull requests targeting `main` run the format and English checks and build the PDF as `ARFV-Notes_ddmmyy.pdf`. Download the `document-preview` artifact from the workflow run to inspect the result.
+Pull requests targeting `main` run formatting, English prose, and PDF build as separate CI jobs, so each check has its own status. The build job produces `ARFV-Notes_ddmmyy.pdf`; download the `document-preview` artifact from the workflow run to inspect the result.
 
 ## Releases
 

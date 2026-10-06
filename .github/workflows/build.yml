@@ -9,14 +9,27 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  format:
+    name: Typst formatting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - name: Check Typst formatting
         run: make format-check
+
+  prose:
+    name: English prose
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
       - name: Check English spelling and grammar
         run: make prose-check
+
+  build:
+    name: PDF build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
       - name: Build PDF
         run: make build
       - uses: actions/upload-artifact@v7
