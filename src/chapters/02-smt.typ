@@ -1,6 +1,8 @@
 #import "../assets/styles/book.typ": chapter-opening, short-title
+#import "@preview/in-dexter:0.7.2": index
 
-== Satisfiability Modulo Theories (SMT) <glossary-smt>
+== Satisfiability Modulo Theories (SMT)
+#index("Satisfiability Modulo Theories (SMT)")
 
 #chapter-opening()
 
