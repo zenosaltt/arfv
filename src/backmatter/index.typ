@@ -1,12 +1,11 @@
 #let entry(term, target, indent: false) = [
   #if indent { h(1.2em) }
   #term, #link(target)[#context counter(page).at(target).first()]
-  #parbreak()
+  #linebreak()
 ]
 
-#let group(title, target, children) = block(breakable: false, above: 0.7em)[
-  #title, #link(target)[#context counter(page).at(target).first()]
-  #parbreak()
+#let group(title, target, children) = [
+  #entry(title, target)
   #for child in children {
     entry(child.at(0), child.at(1), indent: true)
   }
@@ -16,8 +15,7 @@
 #set par(
   first-line-indent: 0pt,
   justify: false,
-  leading: 0.85em,
-  spacing: 0.2em,
+  leading: 1.1em,
 )
 #heading(level: 1, numbering: none)[Index]
 // To add a term, label its first occurrence in a chapter (for prose, use
