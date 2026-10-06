@@ -4,8 +4,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     branches: [main]
+  push:
+    branches: [main]
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
@@ -14,24 +17,49 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - name: Prepare Docker tools image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          tags: arfv-tools:0.15.1
+          cache-from: type=gha,scope=arfv-tools
       - name: Check Typst formatting
-        run: make format-check
+        run: make --assume-old=docker-image format-check
 
   prose:
     name: English prose
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - name: Prepare Docker tools image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          tags: arfv-tools:0.15.1
+          cache-from: type=gha,scope=arfv-tools
       - name: Check English spelling and grammar
-        run: make prose-check
+        run: make --assume-old=docker-image prose-check
 
   build:
     name: PDF build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - name: Prepare and cache Docker tools image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          tags: arfv-tools:0.15.1
+          cache-from: type=gha,scope=arfv-tools
+          cache-to: type=gha,scope=arfv-tools,mode=max,ignore-error=true
       - name: Build PDF
-        run: make build
+        run: make --assume-old=docker-image build
       - uses: actions/upload-artifact@v7
         with:
           name: document-preview
