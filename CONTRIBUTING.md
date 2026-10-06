@@ -47,7 +47,7 @@ Since most of this repository is made out of readable text plus some code, check
 make check
 ```
 
-This runs formatting, prose, and build checks, reports each result, and exits with an error if any check fails.
+This prepares the Docker tools image once, shows progress for formatting, prose, and build checks, and reports each result. Tool output is shown if a check fails; the command exits with an error if any check fails.
 
 Here is a breakdown of the check pipeline (you can run each of them separately, in any order):
 * `make format-check`: checks whether the Typst sources are well formatted, e.g. no more than 80 characters per line. Run `make format` to format edited files accordingly.

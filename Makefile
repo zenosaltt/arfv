@@ -11,18 +11,25 @@ export RELEASE_TAG
 .PHONY: docker-image build watch docker-build format format-check prose-check check clean
 
 docker-image:
+	@if [ "$(CHECK_PROGRESS)" != 1 ]; then printf '… Preparing Docker tools image\n'; fi
 	@docker build --quiet --tag $(TOOLS_IMAGE) . >/dev/null
 
 format: docker-image
-	$(DOCKER_RUN) typstyle --line-width 80 --wrap-text=fill --inplace $(TYPST_SOURCES)
-	$(DOCKER_RUN) python3 .github/scripts/check-line-width.py $(TYPST_SOURCES)
+	@printf '… Formatting Typst sources\n'
+	@$(DOCKER_RUN) typstyle --line-width 80 --wrap-text=fill --inplace $(TYPST_SOURCES)
+	@printf '… Checking line width\n'
+	@$(DOCKER_RUN) python3 .github/scripts/check-line-width.py $(TYPST_SOURCES)
 
 format-check: docker-image
+	@printf '… Checking Typst formatting\n'
 	@$(DOCKER_RUN) typstyle --line-width 80 --wrap-text=fill --check $(TYPST_SOURCES)
+	@printf '… Checking line width\n'
 	@$(DOCKER_RUN) python3 .github/scripts/check-line-width.py $(TYPST_SOURCES)
 
 prose-check: docker-image
+	@printf '… Preparing Vale styles\n'
 	@$(DOCKER_RUN) sh -c 'test -d .github/vale/Harper || vale sync'
+	@printf '… Checking prose\n'
 	@$(DOCKER_RUN) vale README.md CONTRIBUTING.md $(TYPST_SOURCES)
 
 check:
@@ -33,8 +40,17 @@ check:
 		reset=$$(printf '\033[0m'); \
 	fi; \
 	failed=0; \
+	printf '… Preparing Docker tools image\n'; \
+	if $(MAKE) --no-print-directory CHECK_PROGRESS=1 docker-image >"$$log" 2>&1; then \
+		printf '%s✓ PASS%s docker-image\n' "$$green" "$$reset"; \
+	else \
+		printf '%s✗ FAIL%s docker-image\n' "$$red" "$$reset"; \
+		sed 's/^/  /' "$$log"; \
+		exit 1; \
+	fi; \
 	for target in format-check prose-check build; do \
-		if $(MAKE) --no-print-directory "$$target" >"$$log" 2>&1; then \
+		printf '… Running %s\n' "$$target"; \
+		if $(MAKE) --no-print-directory --assume-old=docker-image "$$target" >"$$log" 2>&1; then \
 			printf '%s✓ PASS%s %s\n' "$$green" "$$reset" "$$target"; \
 		else \
 			printf '%s✗ FAIL%s %s\n' "$$red" "$$reset" "$$target"; \
@@ -46,11 +62,13 @@ check:
 
 build: docker-image
 	@mkdir -p build
+	@printf '… Compiling PDF\n'
 	@$(DOCKER_RUN) typst compile --diagnostic-format $(TYPST_DIAGNOSTIC_FORMAT) --input "release-tag=$${RELEASE_TAG}" $(SOURCE) "$(OUTPUT)"
 
 watch: docker-image
-	mkdir -p build
-	$(DOCKER_RUN) typst watch --diagnostic-format $(TYPST_DIAGNOSTIC_FORMAT) --input "release-tag=$${RELEASE_TAG}" $(SOURCE) "$(OUTPUT)"
+	@mkdir -p build
+	@printf '… Watching Typst sources\n'
+	@$(DOCKER_RUN) typst watch --diagnostic-format $(TYPST_DIAGNOSTIC_FORMAT) --input "release-tag=$${RELEASE_TAG}" $(SOURCE) "$(OUTPUT)"
 
 docker-build: build
 
