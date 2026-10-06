@@ -6,23 +6,24 @@
 #import algorithmic: algorithm-figure
 #import "@preview/typed-dsa:0.6.0": bst, graph
 
-== Propositional Satisfiability (SAT)
+== Propositional Satisfiability (SAT) <glossary-sat>
 #chapter-opening(
   quote: [This chapter deserves a quote.],
   author: [Me.],
 )
 
-=== Boolean logics and SAT
+=== Boolean logics and SAT <glossary-boolean-logics>
 
-=== Basic SAT-solving techniques
+=== Basic SAT-solving techniques <glossary-sat-solving>
 ==== Generalities
-==== Resolution
-==== Tableaux
-==== DPLL
-=== Ordered binary decision diagrams (OBDDs)
+==== Resolution <glossary-resolution>
+==== Tableaux <glossary-tableaux>
+==== DPLL <glossary-dpll>
+=== Ordered binary decision diagrams (OBDDs) <glossary-obdd>
 #short-title[Ordered binary decision diagrams]
-=== Modern CDCL SAT solvers
+=== Modern CDCL SAT solvers <glossary-cdcl>
 === SAT functionalities: proofs, unsat scores, optimization
+<glossary-sat-functionalities>
 #short-title[SAT functionalities]
 
 
@@ -61,9 +62,10 @@ Here $F |_(l = 1)$ denotes the formula simplified after setting $l$ to true.
 
 #let automaton-style = (state: (radius: 0.4))
 
-An automaton can be described by its transition table. In this deterministic
-example, the two states record whether the number of $1$s read so far is even or
-odd. The initial and accepting state is `even` (@fig-parity-dfa).
+An automaton #metadata("glossary-automaton") <glossary-automaton> can be
+described by its transition table. In this deterministic example, the two states
+record whether the number of $1$s read so far is even or odd. The initial and
+accepting state is `even` (@fig-parity-dfa).
 
 #let parity-dfa = finite.create-automaton(
   (
@@ -109,9 +111,10 @@ stay put or guess that the current `a` begins the final suffix
 
 === Trees and graphs with typed-dsa
 
-A binary search tree follows from the order in which keys are inserted. The root
-is $8$; smaller keys go to its left subtree and larger keys to its right
-(@fig-bst).
+A binary search tree #metadata("glossary-binary-search-tree")
+<glossary-binary-search-tree> follows from the order in which keys are inserted.
+The root is $8$; smaller keys go to its left subtree and larger keys to its
+right (@fig-bst).
 
 #body_diagram(
   bst(8, 4, 12, 2, 6, 10, 14).diagram,
