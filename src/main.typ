@@ -40,3 +40,5 @@
 // Back matter follows the last chapter on a new page.
 #pagebreak()
 #include "backmatter/references.typ"
+#pagebreak()
+#include "backmatter/index.typ"
