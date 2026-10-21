@@ -7,7 +7,12 @@
 // #index("Root", "subterm") for a nested entry.
 #columns(2, gutter: 1cm)[
   #set text(size: 9pt)
-  #set par(first-line-indent: 0pt, justify: false, leading: 1.1em, spacing: 1em)
+  #set par(
+    first-line-indent: (amount: 0pt, all: false),
+    justify: false,
+    leading: 1.1em,
+    spacing: 1em,
+  )
   #make-index(
     title: none,
     entry-casing: key => key,

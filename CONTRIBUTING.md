@@ -1,43 +1,328 @@
 # Contributing
 
-To build the notes locally, install Git, Make, and Docker, then follow the [build instructions](README.md#build-the-pdf-on-your-own). Run all commands below from the repository root.
+Install Git, Make, and Docker, then follow the [build instructions](README.md#build-the-pdf-on-your-own).
+Run commands from the repository root. Keep the notes in English.
 
 ## Find and edit content
 
-The structure of this repository tries to make additions, edits, and deletes as easier as possible by placing each piece of the document in its appropriate, coherent place. Here is how the source files are arranged:
+- `src/main.typ` includes files in reading order and controls page breaks.
+- `src/chapters/` holds chapter text; `src/frontmatter/` holds opening pages;
+  `src/backmatter/` holds references and the index.
+- `src/assets/styles/book.typ` defines the shared layout and reusable helpers.
+- `src/assets/images/` holds local images; `src/bibliography.bib` holds sources.
 
-- `src/main.typ` is the entry point: it includes files in reading order and places page breaks between parts and chapters.
-- `src/frontmatter/` holds the cover, preface, notes, contents, and other opening pages; `src/chapters/` holds the chapters; `src/backmatter/` holds references.
-- `src/assets/styles/book.typ` defines the layout and reusable elements. `src/bibliography.bib` holds citation data; `src/assets/images/` holds the cover photo and other local assets.
+Edit the relevant chapter and use `make watch` to rebuild after each save.
+Press `Ctrl+C` to stop and remove the watcher. ARFV and ML share the global
+container name `typst-watch`, so only one watcher can run at a time. If it
+already exists, run `make clean` in either repository to stop it before
+starting another. Cleaning stops the shared watcher before deleting PDFs
+from the current repository; if Docker is unavailable, it warns and still
+cleans those PDFs.
+The optional VS Code settings use Tinymist with `src/main.typ` as the entry
+point. Compile that entry point, rather than individual chapters, to retain
+styles, numbering, and references. Keep layout changes in `book.typ` and
+content in the chapters; keep shared conventions aligned across ARFV and ML.
 
-Edit the relevant `.typ` file to change the text. The optional VS Code settings in `.vscode/` use Tinymist with `src/main.typ` as the entry point. Run `make watch` for a PDF that rebuilds after each save.
+## Paragraphs, sections, chapters, and parts
 
-## Add a chapter
-
-Create a `.typ` file in `src/chapters/` with a `==` heading and `#chapter-opening()` (imported from `../assets/styles/book.typ`). For example:
+Separate paragraphs with a blank line. A single source newline continues the
+same paragraph. Use `*bold*`, `_emphasis_`, and backticks for inline code;
+`-` starts a bullet and `+` starts a numbered list. For example:
 
 ```typst
-#import "../assets/styles/book.typ": chapter-opening
+A *formula* may contain an _unassigned_ variable called `x`.
+This sentence continues the same paragraph.
 
-== New chapter
+This is a new paragraph.
 
-#chapter-opening()
+- First case.
+- Second case.
 ```
 
-Then add it at the appropriate point in `src/main.typ`:
+The heading hierarchy is fixed by the book style:
+
+| Level | Syntax | Numbering / contents |
+| --- | --- | --- |
+| Part | `= Title`, via `part-page` | Roman numeral; main contents |
+| Chapter | `== Title`, inside `chapter` | Continuous chapter number; main contents |
+| Section | `=== Title` | Chapter.section; main and chapter margin contents |
+| Subsection | `==== Title` | Unnumbered; omitted from both contents |
+
+Create `src/chapters/new-chapter.typ` with this skeleton. Use a descriptive
+filename, optionally with a numeric prefix to match neighboring chapters.
+
+```typst
+#import "../assets/styles/book.typ": chapter-opening, short-title
+
+== New chapter <chap-new>
+
+#chapter-opening()
+
+=== A section with a long descriptive title <sec-example>
+#short-title[Short section title]
+
+The section text starts here.
+
+==== A subsection
+
+More text.
+```
+
+`short-title` is optional: it changes only the chapter's margin contents.
+Place it immediately after the section heading. `chapter-opening` must follow
+the chapter heading and precede its sections; it can also take
+`quote: [Opening quotation]` and `author: [Author]`.
+
+Register the chapter at the intended position in `src/main.typ`:
 
 ```typst
 #blank-page-if-needed()
 #chapter([#include "chapters/new-chapter.typ"])
 ```
 
-The first call starts the chapter on a right-hand page; the second applies chapter numbering. Common helpers in `src/assets/styles/book.typ` include `#body_figure(...)` and `#margin_figure(...)` for figures, the corresponding `*_diagram` and `*_table` helpers, and `#short-title[Short title]` for the margin contents. See their definitions or existing chapters for arguments and examples.
+The first call starts on a right-hand page. The wrapper advances the chapter
+counter and resets equation, figure, table, and algorithm counters. A filename
+prefix does not determine numbering; include order does.
 
-## Add other elements
+To introduce a part, import `part-page` from `assets/styles/book.typ` in
+`src/main.typ` if it is not already imported, then insert this before its
+first chapter:
 
-For an opening page, add a file to `src/frontmatter/` and include it in `src/main.typ` at the intended position. Follow the surrounding page breaks and the existing front matter files for the appropriate page helper.
+```typst
+#blank-page-if-needed()
+#part-page("New part")
+```
 
-Add references to `src/bibliography.bib`; the bibliography is rendered by `src/backmatter/references.typ`. Store local images in `src/assets/images/`. For reusable layout or figure helpers, edit `src/assets/styles/book.typ`.
+For a part that needs a reference, use this equivalent of `part-page` instead,
+so the label attaches directly to the heading:
+
+```typst
+#blank-page-if-needed()
+#v(6cm)
+= New part <part-new>
+```
+
+A label appended to `part-page(...)` labels its output sequence and cannot
+be referenced. Parts do not reset chapter numbering. Use the chapter wrapper
+for chapters and let the style generate all numbers.
+
+For an opening page, add a file in
+`src/frontmatter/`, include it in `src/main.typ`, and follow the page helpers
+and page breaks used by neighboring opening pages.
+
+## Equations and cross-references
+
+Use `$...$` for inline math and `$ ... $` (with spaces inside both delimiters)
+for a displayed equation. The book numbers displayed equations by chapter.
+Use a local override for an unnumbered display:
+
+```typst
+For inline math, write $a^2 + b^2 = c^2$ within the sentence.
+
+$ a^2 + b^2 = c^2 $ <eq-pythagoras>
+
+#math.equation(block: true, numbering: none)[
+  $ x + 0 = x $
+]
+
+By @eq-pythagoras, the squared lengths satisfy the stated relation.
+```
+
+Attach a unique label immediately after the target and refer to it with
+`@label`; Typst supplies its number and a link. Use descriptive prefixes such
+as `part-`, `chap-`, `sec-`, `eq-`, `fig-`, `tab-`, and `alg-`. Labels and
+bibliography keys share the `@...` reference syntax, so keep them distinct.
+
+```typst
+See @part-new, @chap-new, and @sec-example.
+See @fig-photo and @tab-values for the supporting material.
+```
+
+For custom link text, use `#link(<sec-example>)[the earlier discussion]`.
+Use labels on numbered levels for numeric heading references: subsections
+are unnumbered in this style. Never type object numbers into the prose or
+reset counters manually.
+
+## Images, diagrams, and tables
+
+Import the helpers needed by each chapter:
+
+```typst
+#import "../assets/styles/book.typ": (
+  body_figure, margin_figure, body_diagram, margin_diagram,
+  body_table, margin_table,
+)
+```
+
+Use `body_*` for the text column and `margin_*` for the right margin. All
+figures share chapter-based figure numbering; tables have their own sequence.
+Provide a caption, describe the element in the text, and place its source
+near the relevant paragraph. Check the PDF for crowded margins, collisions
+with chapter contents, and diagrams or tables that exceed the available width.
+
+### Image files
+
+Store images in `src/assets/images/`; use SVG for vector artwork and PNG or
+JPEG for raster images. These examples use the existing cover photograph;
+replace it with the relevant asset:
+
+```typst
+#body_figure(
+  "../images/broadperspective.jpg",
+  [An example photograph.],
+  width: 70%,
+) <fig-photo>
+
+#margin_figure(
+  "../images/broadperspective.jpg",
+  caption: [A photograph in the margin.],
+  id: <fig-margin-photo>,
+)
+```
+
+The image helpers resolve paths inside `src/assets/styles/book.typ`, so use
+`../images/filename.svg`. A direct `image(...)` call in a chapter instead uses
+`../assets/images/filename.svg`. Body helpers take an appended label;
+margin helpers need `id: <label>` to label the figure inside the margin note.
+`margin_figure` fills the margin width; `body_figure` accepts `width`.
+
+### Automaton, graph, and tree diagrams
+
+Use generated Typst content with `body_diagram` or `margin_diagram`. Supply
+alternative text describing the diagram. Keep package versions explicit;
+the following versions are already used in ARFV and can also be used in ML.
+The first compilation may download packages.
+
+An automaton uses a dictionary from each state to its outgoing transitions.
+Here the two states track the parity of the number of `1`s:
+
+```typst
+#import "@preview/finite:0.5.1" as finite
+
+#let parity = finite.create-automaton(
+  (
+    even: (even: "0", odd: "1"),
+    odd: (odd: "0", even: "1"),
+  ),
+  initial: "even",
+  final: ("even",),
+  labels: (even: $E$, odd: $O$),
+)
+
+#margin_diagram(
+  finite.automaton(parity, style: (state: (radius: 0.4))),
+  caption: [A DFA accepting an even number of ones.],
+  alt: "Two states E and O; input 1 switches states and 0 loops",
+  id: <fig-parity>,
+)
+```
+
+For trees and graphs, `typed-dsa` exposes generated content as `.diagram`:
+
+```typst
+#import "@preview/typed-dsa:0.6.0": bst, graph
+
+#body_diagram(
+  bst(8, 4, 12, 2, 6, 10, 14).diagram,
+  [A binary search tree.],
+  "Root 8, children 4 and 12, and leaves 2, 6, 10, and 14",
+) <fig-tree>
+
+#body_diagram(
+  graph(
+    ("S": ("A", "B"), "A": ("T",), "B": ("T",), "T": ()),
+    layout: "layered",
+  ).diagram,
+  [Two directed paths from S to T.],
+  "Edges S to A, S to B, A to T, and B to T",
+) <fig-graph>
+```
+
+Each graph key names a vertex; its tuple lists outgoing neighbors. Use `()`
+for no neighbors and `(value,)` for a single neighbor. To move any generated
+diagram between placements, pass the same content to the other diagram
+helper: body captions and alternative text are positional arguments; margin
+captions, alternative text, and IDs are named arguments.
+
+### Tables
+
+Build the cells with `table(...)`, then wrap them to obtain a caption,
+number, and reference. Both placements accept the same table content:
+
+```typst
+#let values = table(
+  columns: (auto, auto),
+  inset: 4pt,
+  table.header([*Input*], [*Output*]),
+  [0], [1],
+  [1], [0],
+)
+
+#body_table(values, [Input and output values.]) <tab-values>
+
+#margin_table(
+  values,
+  [The same values in the margin.],
+  id: <tab-margin-values>,
+)
+```
+
+Use `table.header` for headers. Keep margin tables narrow; move wider tables
+into the body. Table captions appear above the table.
+
+## Index entries and bibliography
+
+### Index terms
+
+Import `index` in each chapter that needs it. Mark only the first occurrence
+of a term, next to its explanation. The marker adds an entry and page number;
+it does not print the term in the body:
+
+```typst
+#import "@preview/in-dexter:0.7.2": index
+
+An automaton#index("Automaton") has states and transitions.
+A binary search tree#index("Binary search tree") orders its keys.
+Unit propagation#index("SAT", "Unit propagation") simplifies a formula.
+```
+
+Use separate arguments for a parent term and subentry. Keep spelling and
+capitalization consistent; use additional markers only when another page
+adds a useful discussion of the same term.
+
+ARFV already includes the index from `src/main.typ`.
+
+The index layout is in `src/backmatter/index.typ`. Its manual column break
+currently occurs at `N`; review the balance when the term list grows.
+
+### Sources and citations
+
+Add a BibTeX entry with a unique, descriptive key to `src/bibliography.bib`.
+For example:
+
+```bibtex
+@book{knuth-taocp-1,
+  author = {Donald E. Knuth},
+  title = {The Art of Computer Programming, Volume 1},
+  publisher = {Addison-Wesley},
+  year = {1997},
+  edition = {3}
+}
+```
+
+Cite its key in the chapter, optionally adding a page locator:
+
+```typst
+See @knuth-taocp-1 for background.
+#cite(<knuth-taocp-1>, supplement: [p. 10])
+```
+
+For online sources, include `url` and `urldate` (the access date); follow an
+existing entry in the bibliography. Cite the source of borrowed explanations,
+figures, and tables, including in captions when appropriate.
+`src/backmatter/references.typ` renders cited entries automatically. An
+entry without a citation is not listed by default; use
+`#cite(<knuth-taocp-1>, form: "none")` to include it without a visible citation.
 
 ## Check changes before a pull request
 
@@ -50,9 +335,14 @@ make check
 This prepares the Docker tools image once, shows progress for formatting, prose, and build checks, and reports each result. Tool output is shown if a check fails; the command exits with an error if any check fails.
 
 Here is a breakdown of the check pipeline (you can run each of them separately, in any order):
+
 * `make format-check`: checks whether the Typst sources are well formatted, e.g. no more than 80 characters per line. Run `make format` to format edited files accordingly.
 * `make prose-check`: looks for typos and inconsistencies of the English plain text inside each source file. It skips Typst code and math. If a valid term is marked as misspelled, add it to `.github/vale/config/vocabularies/ARFV/accept.txt`.
 * `make build`: tries to build the PDF from the Typst source files and additional assets.
+
+After a successful build, inspect the PDF in `build/`: check page breaks,
+contents, captions, references, index entries, and margin placement. A build
+can succeed even when an element is too wide or poorly placed.
 
 Pull requests targeting `main` run formatting, English prose, and PDF build as separate CI jobs, so each check has its own status. CI caches the Docker build layers between runs; a run on `main` after each merge refreshes the shared cache. Each job loads the image before invoking Make, which skips rebuilding it. The build job produces `ARFV-Notes_ddmmyy.pdf`; download the `document-preview` artifact from the workflow run to inspect the result.
 

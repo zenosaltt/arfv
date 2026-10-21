@@ -1,0 +1,2 @@
+# Raw notes go here
+Did you attend the lectures? Took some notes on paper or digitally? Great, because it turns out they might be useful, even just to keep track of where the lecturer stopped last time.
