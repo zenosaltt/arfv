@@ -1,6 +1,4 @@
-#import "assets/styles/book.typ": (
-  blank-page-if-needed, chapter, document-style, part-page,
-)
+#import "assets/styles/book.typ": blank-page, chapter, document-style, part-page
 
 #set document(
   title: "Automated Reasoning and Formal Verification",
@@ -23,18 +21,18 @@
 #pagebreak()
 #include "frontmatter/contents.typ"
 
-// A part or chapter begins on a right-hand page. The break inserts a blank
-// left-hand page only when the preceding content ends on a right-hand page.
-#blank-page-if-needed()
+// Explicit blank separators: each call inserts exactly one blank page.
+// Use pagebreak() instead wherever only a new page is wanted.
+#blank-page()
 #part-page("Automated Reasoning")
 
-#blank-page-if-needed()
+#blank-page()
 #chapter([#include "chapters/01-sat.typ"])
-#blank-page-if-needed()
+#blank-page()
 #chapter([#include "chapters/02-smt.typ"])
-#blank-page-if-needed()
+#blank-page()
 #part-page("Formal Verification")
-#blank-page-if-needed()
+#blank-page()
 #chapter([#include "chapters/05-explicit_state_ctl_model_checking.typ"])
 
 // Back matter follows the last chapter on a new page.

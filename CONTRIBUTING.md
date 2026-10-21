@@ -78,20 +78,31 @@ the chapter heading and precede its sections; it can also take
 Register the chapter at the intended position in `src/main.typ`:
 
 ```typst
-#blank-page-if-needed()
+#blank-page()
 #chapter([#include "chapters/new-chapter.typ"])
 ```
 
-The first call starts on a right-hand page. The wrapper advances the chapter
-counter and resets equation, figure, table, and algorithm counters. A filename
-prefix does not determine numbering; include order does.
+`blank-page()` always inserts exactly one page containing only the footer
+"intentionally left blank". It finishes the preceding page and starts the next
+content on a fresh page, regardless of odd/even page numbers. No additional
+`pagebreak()` is needed around it. Consecutive calls insert consecutive blank
+pages. The blank page counts toward pagination but does not display its number.
+
+Keep these layout decisions in `src/main.typ`. Use `#pagebreak()` when you only
+want to start a new page without inserting a blank separator. Parts and chapters
+do not automatically start on odd pages; add or remove `#blank-page()` explicitly
+at each boundary where a blank page is wanted.
+
+The chapter wrapper advances the chapter counter and resets equation, figure,
+table, and algorithm counters. A filename prefix does not determine numbering;
+include order does.
 
 To introduce a part, import `part-page` from `assets/styles/book.typ` in
 `src/main.typ` if it is not already imported, then insert this before its
 first chapter:
 
 ```typst
-#blank-page-if-needed()
+#blank-page()
 #part-page("New part")
 ```
 
@@ -99,7 +110,7 @@ For a part that needs a reference, use this equivalent of `part-page` instead,
 so the label attaches directly to the heading:
 
 ```typst
-#blank-page-if-needed()
+#blank-page()
 #v(6cm)
 = New part <part-new>
 ```

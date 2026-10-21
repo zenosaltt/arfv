@@ -46,24 +46,6 @@
     margin: (left: 2.4cm, right: 7cm, top: 2.5cm, bottom: 2.5cm),
     numbering: "1",
     number-align: center,
-    footer: context {
-      let starts = query(metadata.where(value: "recto-before"))
-      let ends = query(metadata.where(value: "recto-after"))
-      let current = counter(page).get().first()
-      let intentional = range(starts.len()).any(i => (
-        current > starts.at(i).location().page()
-          and current < ends.at(i).location().page()
-      ))
-      if intentional {
-        align(center)[#text(
-          size: 6.5pt,
-          style: "italic",
-          fill: gray,
-        )[intentionally left blank]]
-      } else {
-        align(center)[#counter(page).display("1")]
-      }
-    },
   )
   set text(font: "New Computer Modern", size: 8pt, lang: "en", fill: ink)
   set par(
@@ -311,12 +293,20 @@
   outline(depth: 3, title: none, indent: 1.1em)
 }
 
-// Start the next part or chapter on an odd (right-hand) page.
-#let blank-page-if-needed() = {
-  metadata("recto-before")
-  pagebreak(to: "odd")
-  metadata("recto-after")
-}
+// Insert exactly one blank page, regardless of the current page number.
+// The page element also separates the preceding and following content.
+#let blank-page() = page(
+  header: none,
+  numbering: none,
+  footer: {
+    set par(first-line-indent: (amount: 0pt, all: false))
+    align(center)[#text(
+      size: 6.5pt,
+      style: "italic",
+      fill: gray,
+    )[intentionally left blank]]
+  },
+)[#box()]
 
 // Part title page; the caller controls its page break.
 #let part-page(title) = {
