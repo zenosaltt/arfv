@@ -113,17 +113,16 @@ and page breaks used by neighboring opening pages.
 ## Equations and cross-references
 
 Use `$...$` for inline math and `$ ... $` (with spaces inside both delimiters)
-for a displayed equation. The book numbers displayed equations by chapter.
-Use a local override for an unnumbered display:
+for a displayed equation. Displays are unnumbered by default. Add a label
+immediately after a display to number it by chapter, even before it is
+referenced. Only labeled displays advance the equation counter:
 
 ```typst
 For inline math, write $a^2 + b^2 = c^2$ within the sentence.
 
 $ a^2 + b^2 = c^2 $ <eq-pythagoras>
 
-#math.equation(block: true, numbering: none)[
-  $ x + 0 = x $
-]
+$ x + 0 = x $
 
 By @eq-pythagoras, the squared lengths satisfy the stated relation.
 ```

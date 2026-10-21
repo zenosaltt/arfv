@@ -114,7 +114,22 @@
   show figure.where(kind: "algorithm"): set figure(
     numbering: figure-numbering,
   )
-  set math.equation(numbering: equation-numbering)
+  // Number only labeled display equations, preserving their reference targets.
+  set math.equation(numbering: none)
+  show: body => context {
+    let labels = query(math.equation.where(block: true))
+      .filter(eq => eq.has("label"))
+      .map(eq => eq.label)
+      .dedup()
+    if labels.len() > 0 {
+      show selector.or(..labels): set math.equation(
+        numbering: equation-numbering,
+      )
+      body
+    } else {
+      body
+    }
+  }
   show math.equation.where(block: true): set block(above: 0.5cm, below: 0.5cm)
   show figure.caption.where(kind: image): it => {
     set text(size: 7.25pt, fill: black)
