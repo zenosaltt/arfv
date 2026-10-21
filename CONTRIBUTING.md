@@ -12,6 +12,12 @@ Run commands from the repository root. Keep the notes in English.
 - `src/assets/images/` holds local images; `src/bibliography.bib` holds sources.
 
 Edit the relevant chapter and use `make watch` to rebuild after each save.
+Press `Ctrl+C` to stop and remove the watcher. ARFV and ML share the global
+container name `typst-watch`, so only one watcher can run at a time. If it
+already exists, run `make clean` in either repository to stop it before
+starting another. Cleaning stops the shared watcher before deleting PDFs
+from the current repository; if Docker is unavailable, it warns and still
+cleans those PDFs.
 The optional VS Code settings use Tinymist with `src/main.typ` as the entry
 point. Compile that entry point, rather than individual chapters, to retain
 styles, numbering, and references. Keep layout changes in `book.typ` and

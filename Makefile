@@ -58,10 +58,10 @@ build: docker-image
 
 watch: docker-image
 	@mkdir -p build
-	@printf 'Watching Typst sources\n'
-	@$(DOCKER_RUN) typst watch --diagnostic-format $(TYPST_DIAGNOSTIC_FORMAT) --input "release-tag=$${RELEASE_TAG}" $(SOURCE) "$(OUTPUT)"
+	@sh .github/scripts/typst-watch.sh watch $(DOCKER_OPTIONS) $(TOOLS_IMAGE) typst watch --diagnostic-format $(TYPST_DIAGNOSTIC_FORMAT) --input "release-tag=$${RELEASE_TAG}" $(SOURCE) "$(OUTPUT)"
 
 docker-build: build
 
 clean:
+	@sh .github/scripts/typst-watch.sh clean
 	rm -f build/ARFV-Notes_*.pdf build/document.pdf
