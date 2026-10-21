@@ -1,4 +1,5 @@
 #import "@preview/marginalia:0.3.1" as marginalia
+#import "graphics.typ": subpar
 
 // Shared palette, margin width, and counters for chapter-scoped numbering.
 #let ink = rgb("25344a")
@@ -79,6 +80,18 @@
     }
     it
   }
+  show math.equation.where(block: true): set par(
+    first-line-indent: (amount: 0pt, all: false),
+  )
+  show math.equation.where(block: false): it => box(context {
+    let prose = par.first-line-indent.all
+    set par(first-line-indent: (amount: 0pt, all: false))
+    if prose {
+      if section-opening.get() { h(1.3em) }
+      section-opening.update(false)
+    }
+    it
+  })
   // Modest list indentation and slightly more space than paragraph leading.
   set list(indent: 1.3em)
   set enum(indent: 1.3em)
@@ -377,6 +390,59 @@
   align(center, data),
   kind: table,
   caption: caption,
+)
+
+// Let Subpar manage panel letters and references; keep chapter numbering.
+// Pass figure(...), <panel-label>, ... just as in subpar.grid.
+#let body_subfigures(
+  ..panels,
+  caption: none,
+  alt: none,
+  id: none,
+  columns: (1fr, 1fr),
+  gutter: 0.5cm,
+) = context {
+  let chapter = chapter-counter.get().first()
+  set figure(alt: alt)
+  subpar.grid(
+    ..panels.pos(),
+    columns: columns,
+    gutter: gutter,
+    caption: caption,
+    label: id,
+    numbering: n => numbering("1.1", chapter, n),
+    numbering-sub-ref: (n, panel) => numbering("1.1a", chapter, n, panel),
+    supplement: [Fig.],
+    show-sub-caption: (number, it) => {
+      set text(size: 7.25pt, fill: black)
+      set par(first-line-indent: (amount: 0pt, all: false), justify: false)
+      align(center)[#strong(number) #it.body]
+    },
+  )
+}
+
+// A group is already a figure: use an unnumbered note, not another figure.
+#let margin_subfigures(
+  ..panels,
+  caption: none,
+  alt: none,
+  id: none,
+) = marginalia.note(
+  body_subfigures(
+    ..panels.pos(),
+    caption: caption,
+    alt: alt,
+    id: id,
+    columns: (1fr,),
+    gutter: 0.3cm,
+  ),
+  numbering: none,
+  side: "right",
+  alignment: "top",
+  shift: true,
+  keep-order: true,
+  text-style: (size: 8pt),
+  par-style: (first-line-indent: (amount: 0pt, all: false)),
 )
 
 // Add a table in the right margin; `id` makes it referenceable.

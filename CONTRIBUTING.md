@@ -9,6 +9,8 @@ Run commands from the repository root. Keep the notes in English.
 - `src/chapters/` holds chapter text; `src/frontmatter/` holds opening pages;
   `src/backmatter/` holds references and the index.
 - `src/assets/styles/book.typ` defines the shared layout and reusable helpers.
+- `src/assets/styles/graphics.typ` pins the shared drawing package versions.
+- `src/examples/graphics.typ` demonstrates the drawing and panel helpers.
 - `src/assets/images/` holds local images; `src/bibliography.bib` holds sources.
 
 Edit the relevant chapter and use `make watch` to rebuild after each save.
@@ -185,18 +187,112 @@ The image helpers resolve paths inside `src/assets/styles/book.typ`, so use
 margin helpers need `id: <label>` to label the figure inside the margin note.
 `margin_figure` fills the margin width; `body_figure` accepts `width`.
 
+### Geometry, plots, and connected nodes
+
+Import the native package interfaces through `src/assets/styles/graphics.typ`.
+That module pins the same versions in ARFV and ML; update both copies together.
+Use a package's layout and drawing primitives rather than calculating arrowheads,
+placing every label with `place`, or drawing chart axes by hand.
+
+| Content | Package / exported API |
+| --- | --- |
+| Geometric constructions, projections, vectors | [CeTZ](https://typst.app/universe/package/cetz/): `cetz` |
+| Function plots, scatter plots, charts | [CeTZ-Plot](https://typst.app/universe/package/cetz-plot/): `plot`, `chart` inside a CeTZ canvas |
+| Connected nodes, flowcharts, commutative diagrams | [Fletcher](https://typst.app/universe/package/fletcher/): `fletcher` |
+| State machines | [Finite](https://typst.app/universe/package/finite/): `finite` |
+| Trees and data structures | [typed-dsa](https://typst.app/universe/package/typed-dsa/): `bst`, `graph` |
+| Groups of panels | [Subpar](https://typst.app/universe/package/subpar/), through the book helpers below |
+
+Keep reusable drawings in `src/assets/images/*.typ` and export their content
+with `#let`. Import that content into a chapter and pass it to `body_diagram`
+or `margin_diagram`. The drawing itself does not need to know its placement,
+caption, label, or figure number.
+
+For geometry, use Cartesian coordinates and native arrow marks:
+
+```typst
+#import "../assets/styles/graphics.typ": cetz, plot, fletcher
+
+#let vector = cetz.canvas({
+  import cetz.draw: *
+  line((0, 0), (2, 1), mark: (end: ">"))
+  content((2, 1.3), $bold(w)$)
+})
+```
+
+CeTZ-Plot handles sampling, axes, ticks, and legends. Data points can replace
+the function; use `mark: "o"` and `style: (stroke: none)` for a scatter plot.
+
+```typst
+#let curve = cetz.canvas({
+  plot.plot(size: (3, 2), x-tick-step: 1, y-tick-step: 0.5, {
+    plot.add(domain: (-1, 1), x => x * x)
+  })
+})
+```
+
+Fletcher connects nodes and places arrow labels without arrowhead geometry:
+
+```typst
+#let flow = fletcher.diagram(
+  fletcher.node((0, 0), [Input]),
+  fletcher.node((1, 0), [Process]),
+  fletcher.edge((0, 0), (1, 0), "->"),
+)
+```
+
+### Figures with multiple panels
+
+Use `body_subfigures` or `margin_subfigures` from `book.typ`. These helpers
+use Subpar to generate panel letters and references. Supply a `figure(...)`
+for each panel, followed by its label. Give generated drawings `kind: image`
+and alternative text. Do not wrap a group in another diagram/figure helper.
+
+```typst
+#import "../assets/styles/book.typ": body_subfigures, margin_subfigures
+
+#body_subfigures(
+  figure(vector, kind: image, caption: [A vector.],
+    alt: "An arrow from the origin to the point two, one"), <fig-vector>,
+  figure(curve, kind: image, caption: [A quadratic function.],
+    alt: "Plot of x squared"), <fig-curve>,
+  caption: [Two mathematical illustrations.],
+  alt: "A vector beside a quadratic plot",
+  id: <fig-pair>,
+)
+
+See @fig-pair, @fig-vector, and @fig-curve.
+```
+
+The body helper defaults to two columns; set `columns: (1fr,)` to stack them.
+The margin helper stacks panels in one column and accepts the same panel,
+caption, alternative text, and ID arguments. A group advances the figure
+counter once. Its panels use letters, with references such as `Fig. 1.2a`.
+The parent and panel numbers remain correct when cited from another chapter.
+Use `id: <label>` for the group instead of appending a label to the helper.
+
+See [the standalone examples](src/examples/graphics.typ) for complete body
+and margin groups, cross-chapter references, and labeled equations. Compile
+them from the repository root with `make examples`; the result is
+`build/graphics-examples.pdf`.
+
+With a local Typst 0.15.1 installation, run
+`typst compile --root src src/examples/graphics.typ build/graphics-examples.pdf`
+after creating `build/`. The examples are separate from the lecture notes
+and do not add pages to them.
+
 ### Automaton, graph, and tree diagrams
 
 Use generated Typst content with `body_diagram` or `margin_diagram`. Supply
-alternative text describing the diagram. Keep package versions explicit;
-the following versions are already used in ARFV and can also be used in ML.
-The first compilation may download packages.
+alternative text describing the diagram. Import packages through `graphics.typ`
+so that chapters share the pinned versions. The first compilation may download
+packages.
 
 An automaton uses a dictionary from each state to its outgoing transitions.
 Here the two states track the parity of the number of `1`s:
 
 ```typst
-#import "@preview/finite:0.5.1" as finite
+#import "../assets/styles/graphics.typ": finite
 
 #let parity = finite.create-automaton(
   (
@@ -219,7 +315,7 @@ Here the two states track the parity of the number of `1`s:
 For trees and graphs, `typed-dsa` exposes generated content as `.diagram`:
 
 ```typst
-#import "@preview/typed-dsa:0.6.0": bst, graph
+#import "../assets/styles/graphics.typ": bst, graph
 
 #body_diagram(
   bst(8, 4, 12, 2, 6, 10, 14).diagram,

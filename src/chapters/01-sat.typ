@@ -1,10 +1,9 @@
 #import "../assets/styles/book.typ": (
   body_diagram, chapter-opening, margin_diagram, short-title,
 )
-#import "@preview/finite:0.5.1" as finite
+#import "../assets/styles/graphics.typ": bst, finite, graph
 #import "@preview/algorithmic:1.0.7" as algorithmic
 #import algorithmic: algorithm-figure
-#import "@preview/typed-dsa:0.6.0": bst, graph
 #import "@preview/in-dexter:0.7.2": index
 
 == Propositional Satisfiability (SAT)

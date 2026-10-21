@@ -8,7 +8,7 @@ DOCKER_OPTIONS = --user "$$(id -u):$$(id -g)" --env HOME=/tmp --env XDG_CACHE_HO
 DOCKER_RUN = docker run --rm $(DOCKER_OPTIONS) $(TOOLS_IMAGE)
 export RELEASE_TAG
 
-.PHONY: docker-image build watch docker-build format format-check prose-check check clean
+.PHONY: docker-image build examples watch docker-build format format-check prose-check check clean
 
 docker-image:
 	@if [ "$(CHECK_PROGRESS)" = 1 ]; then docker build --quiet --tag $(TOOLS_IMAGE) . >/dev/null; \
@@ -56,6 +56,10 @@ build: docker-image
 	@mkdir -p build
 	@sh .github/scripts/progress.sh 'Compiling PDF' $(DOCKER_RUN) typst compile --diagnostic-format $(TYPST_DIAGNOSTIC_FORMAT) --input "release-tag=$${RELEASE_TAG}" $(SOURCE) "$(OUTPUT)"
 
+examples: docker-image
+	@mkdir -p build
+	@sh .github/scripts/progress.sh 'Compiling graphics examples' $(DOCKER_RUN) typst compile --diagnostic-format $(TYPST_DIAGNOSTIC_FORMAT) --root src src/examples/graphics.typ build/graphics-examples.pdf
+
 watch: docker-image
 	@mkdir -p build
 	@sh .github/scripts/typst-watch.sh watch $(DOCKER_OPTIONS) $(TOOLS_IMAGE) typst watch --diagnostic-format $(TYPST_DIAGNOSTIC_FORMAT) --input "release-tag=$${RELEASE_TAG}" $(SOURCE) "$(OUTPUT)"
@@ -64,4 +68,4 @@ docker-build: build
 
 clean:
 	@sh .github/scripts/typst-watch.sh clean
-	rm -f build/ARFV-Notes_*.pdf build/document.pdf
+	rm -f build/ARFV-Notes_*.pdf build/document.pdf build/graphics-examples.pdf
