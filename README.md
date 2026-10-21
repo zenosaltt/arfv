@@ -39,8 +39,17 @@ name (for example, `ARFV-Notes_041026.pdf` for 4 October 2026). The first run
 builds a Docker image with the required tools. The [Makefile](Makefile) shows
 the commands it runs. Other useful commands:
 
-- `make watch`: rebuild the PDF after each save.
-- `make clean`: remove generated PDFs from `build/`.
+- `make watch`: rebuild the PDF after each save; `Ctrl+C` stops and removes
+  the watcher container.
+- `make clean`: stop any watcher, then remove generated PDFs from `build/`.
+
+The watcher uses the global Docker container name `typst-watch`, shared by
+ARFV and ML. Only one watcher can run at a time. If the name is already in
+use, run `make clean` in either repository before starting another watcher.
+Cleaning stops the shared watcher even if it was started in the other
+repository; it removes PDFs only from the current repository. If Docker is
+unavailable, cleaning still removes PDFs and warns that the watcher could
+not be checked.
 
 Without a release tag, the cover shows `DRAFT` and the build date. To edit the
 notes or open a pull request, see [CONTRIBUTING.md](CONTRIBUTING.md).
