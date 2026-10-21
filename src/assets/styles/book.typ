@@ -9,6 +9,7 @@
 #let image-counter = counter(figure.where(kind: image))
 #let table-counter = counter(figure.where(kind: table))
 #let algorithm-counter = counter(figure.where(kind: "algorithm"))
+#let section-opening = state("section-opening", true)
 
 #let figure-numbering(number) = numbering(
   "1.1",
@@ -68,9 +69,26 @@
     justify: true,
     leading: 0.68em,
     spacing: 0.65em,
-    first-line-indent: (amount: 1.3em, all: true),
+    first-line-indent: (amount: 0pt, all: true),
   )
+  // Indent only the first prose line after a section title.
+  show text: it => context {
+    if par.first-line-indent.all {
+      if section-opening.get() { h(1.3em) }
+      section-opening.update(false)
+    }
+    it
+  }
+  // Modest list indentation and slightly more space than paragraph leading.
+  set list(indent: 1.3em)
+  set enum(indent: 1.3em)
+  show list: set block(above: 0.8em, below: 0.8em)
+  show enum: set block(above: 0.8em, below: 0.8em)
+  show list: set par(first-line-indent: (amount: 0pt, all: false))
+  show enum: set par(first-line-indent: (amount: 0pt, all: false))
   set heading(numbering: book-numbering)
+  show heading: set par(first-line-indent: (amount: 0pt, all: false))
+  show outline: set par(first-line-indent: (amount: 0pt, all: false))
   // Reserve the wide outer margin for notes and marginal figures.
   show: marginalia.setup.with(
     inner: (far: 2.4cm, width: 0cm, sep: 0cm),
@@ -83,6 +101,7 @@
   show: style-algorithm
   // One paragraph line of breathing room around every numbered object.
   show figure: set block(above: 0.5cm, below: 0.5cm)
+  show figure: set par(first-line-indent: (amount: 0pt, all: false))
   show figure.where(kind: image): set figure(
     numbering: figure-numbering,
     supplement: [Fig.],
@@ -99,25 +118,25 @@
   show math.equation.where(block: true): set block(above: 0.5cm, below: 0.5cm)
   show figure.caption.where(kind: image): it => {
     set text(size: 7.25pt, fill: black)
-    set par(justify: true, first-line-indent: 0pt)
+    set par(justify: true, first-line-indent: (amount: 0pt, all: false))
     align(left)[#strong([Fig. #context it.counter.display(it.numbering)]):
       #it.body]
   }
   show figure.caption.where(kind: table): it => {
     set text(size: 7.25pt, fill: black)
-    set par(justify: false, first-line-indent: 0pt)
+    set par(justify: false, first-line-indent: (amount: 0pt, all: false))
     align(center)[#strong([Table #context it.counter.display(it.numbering)]):
       #it.body]
   }
   show heading.where(level: 1): it => {
     if it.numbering == none {
       block(above: 0pt, below: 1cm)[
-        #set par(justify: false, first-line-indent: 0pt)
+        #set par(justify: false, first-line-indent: (amount: 0pt, all: false))
         #align(left)[#text(size: 19.5pt, weight: "bold")[#it.body]]
       ]
     } else {
       block(above: 0pt, below: 1cm)[
-        #set par(justify: false, first-line-indent: 0pt)
+        #set par(justify: false, first-line-indent: (amount: 0pt, all: false))
         #align(left)[
           #text(
             size: 8.5pt,
@@ -131,7 +150,7 @@
     }
   }
   show heading.where(level: 2): it => block(above: 0pt, below: 0.45cm)[
-    #set par(justify: false, first-line-indent: 0pt)
+    #set par(justify: false, first-line-indent: (amount: 0pt, all: false))
     #align(left)[
       #text(size: 9pt, weight: "bold", fill: accent)[CHAPTER
         #chapter-counter.display("1")]
@@ -142,15 +161,19 @@
     #line(length: 100%, stroke: (paint: accent, thickness: 1.3pt))
   ]
   show heading.where(level: 3): it => block(above: 0.7cm, below: 0.25cm)[
-    #set par(justify: false, first-line-indent: 0pt)
+    #set par(justify: false, first-line-indent: (amount: 0pt, all: false))
     #align(left)[#text(size: 10.5pt, weight: "bold")[#counter(heading).display()
       #it.body]]
   ]
+  show heading: it => {
+    section-opening.update(true)
+    it
+  }
   body
 }
 
 // Standalone photographic cover with a translucent text panel.
-#let cover-page(title, author, release-tag: "") = page(
+#let cover-page(title, author, cover-image: none, release-tag: "") = page(
   paper: "a4",
   margin: 0pt,
   header: none,
@@ -159,7 +182,7 @@
 )[
   #place(top + left)[
     #image(
-      "../images/broadperspective.jpg",
+      cover-image,
       width: 210mm,
       height: 297mm,
       fit: "cover",
@@ -173,7 +196,7 @@
       radius: 2mm,
       inset: (left: 11mm, right: 11mm, top: 9mm, bottom: 9mm),
     )[
-      #set par(justify: false, first-line-indent: 0pt)
+      #set par(justify: false, first-line-indent: (amount: 0pt, all: false))
       #text(size: 12pt, weight: "bold", fill: white)[#author]
       #v(5mm)
       #text(size: 24pt, weight: "bold", fill: white)[#title]
@@ -190,21 +213,20 @@
 ]
 
 // Standalone colophon with build date and license notice.
-#let build-page() = page(
+#let build-page(cover-credit: none) = page(
   paper: "a4",
   margin: 0pt,
   header: none,
   footer: none,
   numbering: none,
 )[
-  #set par(justify: false, first-line-indent: 0pt)
+  #set par(justify: false, first-line-indent: (amount: 0pt, all: false))
   #align(center + horizon)[
     #text(size: 9pt)[Last build: #datetime.today().display()]
     #v(1.2cm)
     #text(size: 9pt)[© 2026 Zeno Saletti]
     #v(0.35cm)
-    #text(size: 9pt)[Cover photograph: _The Broad_, by Zeno Saletti. Los
-      Angeles, CA, May 2026.]
+    #text(size: 9pt)[#cover-credit]
     #v(0.35cm)
     #text(size: 9pt)[
       Original text, illustrations, and cover photograph licensed under \
@@ -230,9 +252,10 @@
 
 // Titled front-matter page for prose such as the preface or notes.
 #let front-page(title, body) = {
+  section-opening.update(true)
   v(2cm)
   align(left)[
-    #set par(first-line-indent: 0pt)
+    #set par(first-line-indent: (amount: 0pt, all: false))
     #text(size: 17pt, weight: "bold")[#title]
   ]
   v(1.2cm)
@@ -242,7 +265,7 @@
 // Contents list: parts, chapters, and sections up to level 3.
 #let contents-page() = {
   align(left)[
-    #set par(first-line-indent: 0pt)
+    #set par(first-line-indent: (amount: 0pt, all: false))
     #text(size: 19.5pt, weight: "bold")[Contents]
   ]
   v(1cm)
@@ -283,7 +306,7 @@
 // Format the captions passed to Marginalia image figures.
 #let margin-caption(number, caption) = {
   set text(size: 7.25pt, fill: black)
-  set par(justify: true, first-line-indent: 0pt)
+  set par(justify: true, first-line-indent: (amount: 0pt, all: false))
   align(left)[#strong([Fig. #context caption.counter.display(
         caption.numbering,
       )]):
@@ -358,7 +381,7 @@
 
 // Short quotation aligned to the right, usable on front or chapter pages.
 #let epigraph(words, author) = align(right)[#block(width: 48%)[
-  #set par(justify: false, first-line-indent: 0pt)
+  #set par(justify: false, first-line-indent: (amount: 0pt, all: false))
   #align(left)[#text(size: 7.5pt, style: "italic")[#words]]
   #v(0.12cm)
   #line(length: 100%, stroke: (paint: black, thickness: 0.8pt))
@@ -391,7 +414,7 @@
   let sections = query(section-selector)
 
   outer-note([
-    #set par(justify: false, first-line-indent: 0pt)
+    #set par(justify: false, first-line-indent: (amount: 0pt, all: false))
     #for index in range(sections.len()) {
       let item = sections.at(index)
       let following = sections.at(index + 1, default: next-major)
